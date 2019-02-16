@@ -1,6 +1,6 @@
+# rapids-rivers-streams
 
-
-
+Example implementation of Fred George style microservices architecture
 
 ## Background
 
@@ -42,3 +42,33 @@ Async Services
 * Service - expresses a need to the bus
 * Other services - willing to respond to that need
 * Multiple responses might be available, service expressing need selects solution
+
+This architecture supports experimentation
+
+* Enable experimentation without changing existing code
+
+Design
+* Events, not Entities
+* History, not Current
+
+Cloud of Signals
+
+* What are the patterns
+* Producers, consumers
+
+Observations
+
+* Services become disposable
+* Loosely coupled via READful JSON packets or DB
+* Self monitoring services replaces unit tests
+* Business monitoring replaces acceptance tests
+* Services language agnostic
+
+Living Software System
+
+* Long-lived systems, short-lived services (human body, cells)
+* Extremely dynamic with continuous deployments
+* Accept it is complex (especially for testing)
+    * Acceptance test on business outcomes
+* Radical impacts to dev processes
+* There will be a learning curve
