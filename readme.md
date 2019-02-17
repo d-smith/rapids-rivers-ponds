@@ -2,6 +2,16 @@
 
 Example implementation of Fred George style microservices architecture
 
+## Overview
+
+This project illustrates one way to implement the rapids, rivers, ponds approad to microservice architecture using AWS technology components.
+
+Here, we'll use Kinesis for our main event bus (rapids). We'll use a simple stream reader to pick off events and write them to various queues (rivers), with services consuming messages in the rivers. Services may persist events or data derived from events or produced by application logic in datastores of choice (ponds).
+
+We'll look at some of the subtlties in the implementation - use of different compute and database components, how we might dispatch to SNS topics for the rivers, etc.
+
+![](./rapids-rivers-ponds.png)
+
 ## Background
 
 Notes from Fred George's [Implementing Micro Service Architecture talk](https://vimeo.com/79866979)
