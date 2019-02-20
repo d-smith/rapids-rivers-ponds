@@ -12,6 +12,18 @@ We'll look at some of the subtlties in the implementation - use of different com
 
 ![](./rapids-rivers-ponds.png)
 
+## Event structure
+
+When writing events to the rapids, we need some standard metadata to enable routing events to interested consumers and their associated rivers.
+
+We'll assume a JSON event structure that includes some standard fields:
+
+* eventDomain - Domain of the event emitter. Think of this in terms of business domain
+* eventName - Name of the event
+* payload - event content
+* timestamp - ISO 8601 UTC timestamp
+* eventId - uuid
+
 ## Background
 
 Notes from Fred George's [Implementing Micro Service Architecture talk](https://vimeo.com/79866979)
