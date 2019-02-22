@@ -24,6 +24,12 @@ We'll assume a JSON event structure that includes some standard fields:
 * timestamp - ISO 8601 UTC timestamp
 * eventId - uuid
 
+## Scenario
+
+From the video, we'll ape the travel scenario where Sally views a page, and an offer engine assembles offers based on events consumed and produced by membership, segmentation, location, and brand services.
+
+For this scenario, we'll have rivers for the services and offers engine, and a single rapids. The rapids will be a Kinesis stream, the rivers SQS queues.
+
 ## Background
 
 Notes from Fred George's [Implementing Micro Service Architecture talk](https://vimeo.com/79866979)

@@ -9,29 +9,66 @@ Parameters:
 
 
 Resources:
-  AlphaQ:
+  MembershipRiver:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Join [-,[AlphaQ, !Ref Stage]]
+      QueueName: !Join [-,[MembershipRiver, !Ref Stage]]
 
-  BetaQ:
+  SegmentationRiver:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Join [-,[BetaQ, !Ref Stage]]
+      QueueName: !Join [-,[SegmentationRiver, !Ref Stage]]
+
+  LocationRiver:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Join [-,[LocationRiver, !Ref Stage]]
+
+  BrandRiver:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Join [-,[BrandRiver, !Ref Stage]]
+
+  OfferEngineRiver:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Join [-,[OfferEngineRiver, !Ref Stage]]
+
 
 
 Outputs:
 
-  AlphaQArn:
+  MembershipRiverArn:
     Value: 
-      !GetAtt AlphaQ.Arn
+      !GetAtt MembershipRiver.Arn
     Export:
       Name: 
-        !Join [-, [AlphaQArn, !Ref 'Stage']]
+        !Join [-, [MembershipRiverArn, !Ref 'Stage']]
 
-  BetaQArn:
+  SegmentationRiverArn:
     Value: 
-      !GetAtt BetaQ.Arn
+      !GetAtt SegmentationRiver.Arn
     Export:
       Name: 
-        !Join [-, [BetaQArn, !Ref 'Stage']]
+        !Join [-, [SegmentationRiverArn, !Ref 'Stage']]
+
+  LocationRiverArn:
+    Value: 
+      !GetAtt LocationRiver.Arn
+    Export:
+      Name: 
+        !Join [-, [LocationRiverArn, !Ref 'Stage']]
+
+  BrandRiverArn:
+    Value: 
+      !GetAtt BrandRiver.Arn
+    Export:
+      Name: 
+        !Join [-, [BrandRiverArn, !Ref 'Stage']]
+
+  OfferEngineRiverArn:
+    Value: 
+      !GetAtt OfferEngineRiver.Arn
+    Export:
+      Name: 
+        !Join [-, [OfferEngineRiverArn, !Ref 'Stage']]
