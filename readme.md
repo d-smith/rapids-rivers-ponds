@@ -28,7 +28,17 @@ We'll assume a JSON event structure that includes some standard fields:
 
 From the video, we'll ape the travel scenario where Sally views a page, and an offer engine assembles offers based on events consumed and produced by membership, segmentation, location, and brand services.
 
-For this scenario, we'll have rivers for the services and offers engine, and a single rapids. The rapids will be a Kinesis stream, the rivers SQS queues.
+For this scenario, we'll have rivers for the services and offers engine, and a single rapids. The rapids will be a Kinesis stream, the rivers SQS queues. We'll also have a river for those interested in consuming offers.
+
+The scenario is this:
+
+* An event conveying Sally is looking at a page is emitted.
+    * The location and brand services respond to the event with some baseline offer events. 
+    * The segmenation service responds to the event by emitting an event stating Sally is a Road Warrior
+    * The membership services response by emitting an event stating Sally is a Platinum member
+* The location and services emit a new offers based on Sally being a Road Warrior
+* The location service emits a new offer based on SAlly being both a Road Warrior and a Platimum member
+* The offer engine will buffer offers for some amount of time, then emit offers
 
 ## Background
 
