@@ -40,6 +40,21 @@ The scenario is this:
 * The location service emits a new offer based on SAlly being both a Road Warrior and a Platimum member
 * The offer engine will buffer offers for some amount of time, then emit offers
 
+### CLI
+
+Use the cli to send events.
+
+```console
+node cli.js 
+cmd >
+```
+
+To send a view page event:
+
+```console
+cmd > send ViewPage '{"name":"Sally"}'
+```
+
 ## Background
 
 Notes from Fred George's [Implementing Micro Service Architecture talk](https://vimeo.com/79866979)
