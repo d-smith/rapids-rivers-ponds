@@ -1,5 +1,15 @@
 const vorpal = require('vorpal')();
 
+const AWS = require('aws-sdk');
+
+
+var proxy = require('proxy-agent');    
+AWS.config.update({
+    httpOptions: { agent: proxy(process.env.https_proxy) }
+});
+
+var kinesis = new AWS.Kinesis();
+
 var streamName;
 
 const dispatchSend = async (args, callback) => {
@@ -8,6 +18,22 @@ const dispatchSend = async (args, callback) => {
         callback();
         return;
     }
+
+    let event = {
+        eventDomain: args.sender,
+        payload: args.data
+    };
+
+    let params = {
+        Data: JSON.stringify(event),
+        PartitionKey: args.source,
+        StreamName: streamName
+    }
+
+
+
+    let res = await kinesis.putRecord(params).promise();
+    console.log(reg);
 
     console.log(args);
     callback();

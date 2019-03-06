@@ -9,6 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "proxy-agent": "^3.0.3",
     "vorpal": "^1.12.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.416.0"
   }
 }
