@@ -20,7 +20,7 @@ const setStream = async(args, callback) => {
 }
 
 vorpal
-    .command('send <event> [data]', 'Publish event with optional data')
+    .command('send <event> <source> [data]', 'Publish event with optional data')
     .action(dispatchSend);
 
     vorpal

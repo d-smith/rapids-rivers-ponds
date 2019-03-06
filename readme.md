@@ -52,7 +52,7 @@ cmd >
 To send a view page event:
 
 ```console
-cmd > send ViewPage '{"name":"Sally"}'
+cmd > send ViewPage TheSource '{"name":"Sally"}'
 ```
 
 ## Background
