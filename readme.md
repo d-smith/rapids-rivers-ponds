@@ -40,6 +40,16 @@ The scenario is this:
 * The location service emits a new offer based on SAlly being both a Road Warrior and a Platimum member
 * The offer engine will buffer offers for some amount of time, then emit offers
 
+### Deploying Rapids and Rivers
+
+To deploy the rapids:
+
+```console
+aws cloudformation create-stack --stack-name rapids \
+--template-body file://cfn/rapids.yml \
+--parameters ParameterKey=Stage,ParameterValue=dev
+```
+
 ### CLI
 
 Use the cli to send events.
