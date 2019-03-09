@@ -1,15 +1,17 @@
 {
-  "name": "cli",
+  "name": "api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "api.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "vorpal": "^1.12.0"
+  "devDependencies": {
+    "aws-sdk": "^2.418.0"
   },
-  "devDependencies": {}
+  "dependencies": {
+    "proxy-agent": "^3.0.3"
+  }
 }

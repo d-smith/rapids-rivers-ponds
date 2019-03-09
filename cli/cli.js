@@ -1,14 +1,6 @@
 const vorpal = require('vorpal')();
 
-const AWS = require('aws-sdk');
-
-
-var proxy = require('proxy-agent');    
-AWS.config.update({
-    httpOptions: { agent: proxy(process.env.https_proxy) }
-});
-
-var kinesis = new AWS.Kinesis();
+const writeToRapids = require('../api/api.js').writeToRapids;
 
 var streamName;
 
@@ -24,18 +16,9 @@ const dispatchSend = async (args, callback) => {
         payload: args.data
     };
 
-    let params = {
-        Data: JSON.stringify(event),
-        PartitionKey: args.source,
-        StreamName: streamName
-    }
-
-
-
-    let res = await kinesis.putRecord(params).promise();
+    let res = await writeToRapids(streamName, args.source, event);
     console.log(res);
 
-    console.log(args);
     callback();
 }
 
