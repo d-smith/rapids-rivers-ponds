@@ -22,3 +22,6 @@ Outputs:
     Export:
       Name: 
         !Join [-, [RapidsArn, !Ref 'Stage']]
+
+  StreamName:
+    Value: !Ref RapidsStream

@@ -33,7 +33,7 @@ const dispatchSend = async (args, callback) => {
 
 
     let res = await kinesis.putRecord(params).promise();
-    console.log(reg);
+    console.log(res);
 
     console.log(args);
     callback();
