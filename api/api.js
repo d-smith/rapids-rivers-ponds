@@ -9,8 +9,6 @@ AWS.config.update({
 
 var kinesis = new AWS.Kinesis();
 
-var streamName;
-
 const writeToRapids = async (streamName, source, event) => {
     let params = {
         Data: JSON.stringify(event),

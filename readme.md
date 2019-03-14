@@ -45,8 +45,8 @@ The scenario is this:
 To deploy the rapids:
 
 ```console
-aws cloudformation create-stack --stack-name rapids \
---template-body file://cfn/rapids.yml \
+aws cloudformation create-stack --stack-name rapids-and-control \
+--template-body file://cfn/rapids-and-control.yml \
 --parameters ParameterKey=Stage,ParameterValue=dev
 ```
 

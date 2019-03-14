@@ -15,13 +15,29 @@ Resources:
       Name: !Join [ -, [Rapids, !Ref "Stage"]]
       ShardCount: 1
 
+  ControlStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Join [ -, [Control, !Ref "Stage"]]
+      ShardCount: 1
+
 Outputs:
-  StreamArn:
+  RapidsStreamArn:
     Value: 
       !GetAtt RapidsStream.Arn
     Export:
       Name: 
         !Join [-, [RapidsArn, !Ref 'Stage']]
 
-  StreamName:
+  RapidsStreamName:
     Value: !Ref RapidsStream
+
+  ControlStreamArn:
+    Value: 
+      !GetAtt ControlStream.Arn
+    Export:
+      Name: 
+        !Join [-, [ControlArn, !Ref 'Stage']]
+
+  ControlStreamName:
+    Value: !Ref ControlStream
