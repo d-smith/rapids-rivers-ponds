@@ -1,8 +1,10 @@
 const vorpal = require('vorpal')();
 
 const writeToRapids = require('../api/api.js').writeToRapids;
+var program = require('commander');
 
 var streamName;
+var controlStream;
 
 const dispatchSend = async (args, callback) => {
     if(streamName == undefined) {
@@ -28,13 +30,33 @@ const setStream = async(args, callback) => {
     callback();
 }
 
+program
+    .version('0.0.1')
+    .option('-c, --control-stream <controlStream>', 'Control stream name')
+    .option('-r, --rapids <rapids>', 'Rapids stream name')
+    .parse(process.argv);
+
 vorpal
     .command('send <event> <source> [data]', 'Publish event with optional data')
     .action(dispatchSend);
 
-    vorpal
-    .command('set stream <stream>', 'Set name of stream to write events to')
-    .action(setStream);
+streamName = program.rapids;
+controlStream = program.controlStream;
+
+console.log(`control stream is ${controlStream}`);
+console.log(`rapids stream is ${program.rapids}`);
+
+if(typeof streamName === 'undefined') {
+    console.log('rapids stream name not given');
+    process.exit(1);
+}
+
+if(typeof controlStream === 'undefined') {
+    console.log('control stream name not given');
+    process.exit(1);
+}
+
+
 
 vorpal
     .delimiter('cmd >')
