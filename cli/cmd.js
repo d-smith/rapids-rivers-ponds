@@ -43,8 +43,6 @@ vorpal
 streamName = program.rapids;
 controlStream = program.controlStream;
 
-console.log(`control stream is ${controlStream}`);
-console.log(`rapids stream is ${program.rapids}`);
 
 if(typeof streamName === 'undefined') {
     console.log('rapids stream name not given');
@@ -55,8 +53,6 @@ if(typeof controlStream === 'undefined') {
     console.log('control stream name not given');
     process.exit(1);
 }
-
-
 
 vorpal
     .delimiter('cmd >')

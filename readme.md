@@ -55,7 +55,7 @@ aws cloudformation create-stack --stack-name rapids-and-control \
 Use the cli to send events.
 
 ```console
-node cli.js 
+node cmd.js 
 cmd >
 ```
 
