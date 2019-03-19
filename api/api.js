@@ -19,7 +19,33 @@ const writeToRapids = async (streamName, source, event) => {
     return kinesis.putRecord(params).promise();
 };
 
+
+// Create a river for the consumer if it is their first subscription,
+// otherwise record the desire to recieve messages.
+const subscribeToService = async (consumer, service) => {
+
+}
+
+// Register a producer of events.
+const registerProducer= async(service) => {
+
+}
+
+// List producers
+const listProducers = async () => {
+
+}
+
+//List consumers
+const listConsumers = async () => {
+
+}
+
 module.exports = {
-    writeToRapids
+    writeToRapids,
+    subscribeToService,
+    registerProducer,
+    listProducers,
+    listConsumers
 };
 

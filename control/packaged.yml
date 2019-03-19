@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Step function hello world with SAM!
+
+  '
+Globals:
+  Function:
+    Runtime: nodejs8.10
+Parameters:
+  Stage:
+    Default: dev
+    Type: String
+Resources:
+  StreamProcessor:
+    Properties:
+      CodeUri: s3://sampack-97068/20b7e9bd41f2efd8ecc9996418b5205b
+      Events:
+        StreamEvent:
+          Properties:
+            BatchSize: 10
+            StartingPosition: LATEST
+            Stream:
+              Fn::Sub: arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/Rapids-${Stage}
+          Type: Kinesis
+      FunctionName:
+        Fn::Join:
+        - '-'
+        - - StreamProcessor
+          - Ref: Stage
+      Handler: control.handler
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31
