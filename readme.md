@@ -52,11 +52,17 @@ aws cloudformation create-stack --stack-name rapids-and-control \
 
 ### CLI
 
-Use the cli to send events.
+Use the cli to send events and commands.
 
 ```console
 node cmd.js --rapids Rapids-dev --control-stream Control-dev
 cmd >
+```
+
+To subscribe to a topic:
+
+```console
+subscribe <river> <topic>
 ```
 
 To send a view page event:

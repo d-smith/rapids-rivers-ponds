@@ -7,18 +7,25 @@ var streamName;
 var controlStream;
 
 const dispatchSend = async (args, callback) => {
-    if(streamName == undefined) {
-        vorpal.log('use the set stream command before dispatching');
-        callback();
-        return;
-    }
-
     let event = {
         eventDomain: args.sender,
         payload: args.data
     };
 
     let res = await writeToRapids(streamName, args.source, event);
+    console.log(res);
+
+    callback();
+}
+
+const dispatchSubscribe = async (args, callback) => {
+    console.log(`send control event ${JSON.stringify(args)}`);
+    let event = {
+        river: args.river,
+        topic: args.topic
+    };
+
+    let res = await writeToRapids(streamName, args.river, event);
     console.log(res);
 
     callback();
@@ -39,6 +46,10 @@ program
 vorpal
     .command('send <event> <source> [data]', 'Publish event with optional data')
     .action(dispatchSend);
+
+vorpal
+    .command('subscribe <river> <topic>', 'Subscribe a river to a topic')
+    .action(dispatchSubscribe);
 
 streamName = program.rapids;
 controlStream = program.controlStream;
