@@ -12,7 +12,7 @@ Parameters:
 Resources:
   StreamProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/20b7e9bd41f2efd8ecc9996418b5205b
+      CodeUri: s3://sampack-97068/0295b817e6ddedfd050597c56e077173
       Events:
         StreamEvent:
           Properties:

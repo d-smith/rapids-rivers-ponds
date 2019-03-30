@@ -21,8 +21,11 @@ const dispatchSend = async (args, callback) => {
 const dispatchSubscribe = async (args, callback) => {
     console.log(`send control event ${JSON.stringify(args)}`);
     let event = {
-        river: args.river,
-        topic: args.topic
+        command: 'subscribe',
+        commandArgs: {
+            river: args.river,
+            topic: args.topic
+        }
     };
 
     let res = await writeToRapids(streamName, args.river, event);
