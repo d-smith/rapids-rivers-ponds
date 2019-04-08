@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Keep track of who's subscribing to what, and vice versa
+
+Parameters:
+  Stage:
+    Type: String
+    Description: stage/environment discriminator to allow instantiating multiple stacks in the same account/region
+
+Resources:
+
+  Subscriptions:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: Subscriber
+          AttributeType: S
+        - AttributeName: Topic
+          AttributeType: S
+      KeySchema:
+        - 
+          AttributeName: Subscriber
+          KeyType: HASH
+        -
+          AttributeName: Topic
+          KeyType: RANGE
+
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+      TableName: !Sub Subscriptions-${Stage}
+      GlobalSecondaryIndexes:
+        
+        - IndexName: SubsForTopic
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+          KeySchema:
+            -
+              AttributeName: Topic
+              KeyType: HASH
+          Projection:
+            NonKeyAttributes:
+              -
+                Subscriber
+            ProjectionType: INCLUDE
+          
+      
