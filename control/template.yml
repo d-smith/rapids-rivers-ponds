@@ -18,6 +18,9 @@ Resources:
       FunctionName: !Join [ -, [StreamProcessor, !Ref "Stage"]]
       Handler: control.handler
       CodeUri: src/
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
       Events:
         StreamEvent:
           Type: Kinesis

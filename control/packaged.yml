@@ -12,7 +12,11 @@ Parameters:
 Resources:
   StreamProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/0295b817e6ddedfd050597c56e077173
+      CodeUri: s3://sampack-97068/1d1e01e1d532cb2128f060eef2eac756
+      Environment:
+        Variables:
+          STAGE:
+            Ref: Stage
       Events:
         StreamEvent:
           Properties:
