@@ -50,6 +50,15 @@ aws cloudformation create-stack --stack-name rapids-and-control \
 --parameters ParameterKey=Stage,ParameterValue=dev
 ```
 
+To deploy the subs tables:
+
+
+```console
+aws cloudformation create-stack --stack-name subs \
+--template-body file://cfn/subs.yml \
+--parameters ParameterKey=Stage,ParameterValue=dev
+```
+
 ### CLI
 
 Use the cli to send events and commands.
