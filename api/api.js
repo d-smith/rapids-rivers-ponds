@@ -10,6 +10,7 @@ AWS.config.update({
 var kinesis = new AWS.Kinesis();
 
 const writeToRapids = async (streamName, source, event) => {
+    console.log(`write ${JSON.stringify(event)} to rapids`);
     let params = {
         Data: JSON.stringify(event),
         PartitionKey: source,

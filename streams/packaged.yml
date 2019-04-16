@@ -1,0 +1,186 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Rapid rivers control plane
+
+  '
+Globals:
+  Function:
+    Runtime: nodejs8.10
+Parameters:
+  Stage:
+    Default: dev
+    Type: String
+Resources:
+  ControlProcExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - sqs:CreateQueue
+            - sqs:GetQueueUrl
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: AccessSQS
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: CreateAndWriteLogs
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - dynamodb:PutItem
+            Effect: Allow
+            Resource:
+              Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}
+          Version: '2012-10-17'
+        PolicyName: WriteToDDB
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - kinesis:GetRecords
+            - kinesis:GetShardIterator
+            - kinesis:DescribeStream
+            - kinesis:ListStreams
+            Effect: Allow
+            Resource:
+              Fn::ImportValue:
+                Fn::Join:
+                - '-'
+                - - ControlArn
+                  - Ref: Stage
+          Version: '2012-10-17'
+        PolicyName: StreamAccess
+    Type: AWS::IAM::Role
+  ControlProcessor:
+    Properties:
+      CodeUri: s3://sampack-97068/3309344265fa34ea5369dca07a13d354
+      Environment:
+        Variables:
+          STAGE:
+            Ref: Stage
+          SUBTABLE:
+            Fn::Join:
+            - '-'
+            - - Subscriptions
+              - Ref: Stage
+      Events:
+        StreamEvent:
+          Properties:
+            BatchSize: 10
+            StartingPosition: LATEST
+            Stream:
+              Fn::Sub: arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/Control-${Stage}
+          Type: Kinesis
+      FunctionName:
+        Fn::Join:
+        - '-'
+        - - ControlProcessor
+          - Ref: Stage
+      Handler: control.handler
+      Role:
+        Fn::GetAtt:
+        - ControlProcExecutionRole
+        - Arn
+    Type: AWS::Serverless::Function
+  StreamProcExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - sqs:SendMessage
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: AccessSQS
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: CreateAndWriteLogs
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - dynamodb:Query
+            Effect: Allow
+            Resource:
+              Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}/index/SubsForTopic
+          Version: '2012-10-17'
+        PolicyName: WriteToDDB
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - kinesis:GetRecords
+            - kinesis:GetShardIterator
+            - kinesis:DescribeStream
+            - kinesis:ListStreams
+            Effect: Allow
+            Resource:
+              Fn::ImportValue:
+                Fn::Join:
+                - '-'
+                - - RapidsArn
+                  - Ref: Stage
+          Version: '2012-10-17'
+        PolicyName: StreamAccess
+    Type: AWS::IAM::Role
+  StreamProcessor:
+    Properties:
+      CodeUri: s3://sampack-97068/3309344265fa34ea5369dca07a13d354
+      Environment:
+        Variables:
+          STAGE:
+            Ref: Stage
+          SUBTABLE:
+            Fn::Join:
+            - '-'
+            - - Subscriptions
+              - Ref: Stage
+      Events:
+        StreamEvent:
+          Properties:
+            BatchSize: 10
+            StartingPosition: LATEST
+            Stream:
+              Fn::Sub: arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/Rapids-${Stage}
+          Type: Kinesis
+      FunctionName:
+        Fn::Join:
+        - '-'
+        - - StreamProcessor
+          - Ref: Stage
+      Handler: stream.handler
+      Role:
+        Fn::GetAtt:
+        - StreamProcExecutionRole
+        - Arn
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31

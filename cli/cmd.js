@@ -8,8 +8,9 @@ var controlStream;
 
 const dispatchSend = async (args, callback) => {
     let event = {
-        eventDomain: args.sender,
-        payload: args.data
+        eventType: args.event,
+        eventDomain: args.source,
+        payload: JSON.parse(args.data)
     };
 
     let res = await writeToRapids(streamName, args.source, event);
