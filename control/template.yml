@@ -12,10 +12,10 @@ Parameters:
     Default: dev
 
 Resources:
-  StreamProcessor:
+  ControlProcessor:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Join [ -, [StreamProcessor, !Ref "Stage"]]
+      FunctionName: !Join [ -, [ControlProcessor, !Ref "Stage"]]
       Handler: control.handler
       CodeUri: src/
       Role: !GetAtt [ LambdaExecutionRole, Arn ]

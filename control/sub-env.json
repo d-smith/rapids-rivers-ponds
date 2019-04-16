@@ -1,5 +1,5 @@
 {
-    "StreamProcessor": {
+    "ControlProcessor": {
         "SUBTABLE":"Subscriptions-dev",
         "STAGE":"dev"
     }
