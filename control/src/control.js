@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 var sqs = new AWS.SQS();
+var dynamodb = new AWS.DynamoDB();
 
 let parseInput = (recordData) => {
     let buff = new Buffer(recordData, 'base64'); 
@@ -53,6 +54,24 @@ const createRiver = async (river) => {
     console.log(response);
 }
 
+const addSubscription = async (river, topic) => {
+    console.log(`add sub to table ${process.env.SUBTABLE}`);
+    let params = {
+        Item: {
+            "Subscriber": {
+                S: river
+            },
+            "Topic": {
+                S: topic
+            }
+        },
+        TableName: process.env.SUBTABLE
+    }
+
+    let response = await dynamodb.putItem(params).promise();
+    console.log(response);
+}
+
 let processSubscribe = async (cmd) => {
     console.log(JSON.stringify(cmd));
     let river = cmd.commandArgs.river;
@@ -68,7 +87,8 @@ let processSubscribe = async (cmd) => {
         console.log('river exists... subscribe');
     }
 
-    
+    console.log('add subscription');
+    await addSubscription(river, topic);
 } 
 
 const handler = async(event, context) => {

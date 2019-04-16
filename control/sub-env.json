@@ -1,0 +1,6 @@
+{
+    "StreamProcessor": {
+        "SUBTABLE":"Subscriptions-dev",
+        "STAGE":"dev"
+    }
+}

@@ -22,6 +22,7 @@ Resources:
       Environment:
         Variables:
           STAGE: !Ref Stage
+          SUBTABLE: !Join [-, [Subscriptions, !Ref 'Stage']]
       Events:
         StreamEvent:
           Type: Kinesis
@@ -63,6 +64,16 @@ Resources:
                   - logs:PutLogEvents
                 Resource: '*'
 
+        - PolicyName: WriteToDDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}'
+
+                
         - PolicyName: StreamAccess
           PolicyDocument:
             Version: '2012-10-17'

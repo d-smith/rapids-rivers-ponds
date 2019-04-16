@@ -48,3 +48,9 @@ Resources:
             ProjectionType: INCLUDE
           
       
+Outputs:
+  Tablename:
+    Value: !Ref Subscriptions
+    Export:
+      Name:
+        !Join [-, [Subscriptions, !Ref 'Stage']]
