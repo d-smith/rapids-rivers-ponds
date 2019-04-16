@@ -18,6 +18,7 @@ Resources:
       FunctionName: !Join [ -, [StreamProcessor, !Ref "Stage"]]
       Handler: control.handler
       CodeUri: src/
+      Role: !GetAtt [ LambdaExecutionRole, Arn ]
       Environment:
         Variables:
           STAGE: !Ref Stage
@@ -25,6 +26,53 @@ Resources:
         StreamEvent:
           Type: Kinesis
           Properties:
-            Stream: !Sub 'arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/Rapids-${Stage}'
+            Stream: !Sub 'arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/Control-${Stage}'
             StartingPosition: LATEST
             BatchSize: 10
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: AccessSQS
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:CreateQueue
+                  - sqs:GetQueueUrl
+                Resource: '*'
+
+        - PolicyName: CreateAndWriteLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+        - PolicyName: StreamAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kinesis:GetRecords
+                  - kinesis:GetShardIterator
+                  - kinesis:DescribeStream
+                  - kinesis:ListStreams
+                Resource: 
+                  Fn::ImportValue: 
+                    !Join ['-', [ControlArn, !Ref 'Stage']]

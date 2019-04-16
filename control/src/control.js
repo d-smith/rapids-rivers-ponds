@@ -43,9 +43,14 @@ let hasRiver = async (river) => {
     }
 }
 
-let createRiver = async (river) => {
+const createRiver = async (river) => {
     let riverQName = formRiverQName(river);
     console.log(`create queue ${riverQName} for river ${river}`);
+
+    let response = await sqs.createQueue({
+        QueueName: riverQName
+    }).promise();
+    console.log(response);
 }
 
 let processSubscribe = async (cmd) => {
@@ -54,13 +59,16 @@ let processSubscribe = async (cmd) => {
     let topic = cmd.commandArgs.topic;
 
     console.log(`subscribe ${river} to ${topic}`);
+    console.log('check river for stage ' + process.env.STAGE);
     let riverExists = await hasRiver(river);
     if(!riverExists) {
         console.log('create river...');
         await createRiver(river);
+    } else {
+        console.log('river exists... subscribe');
     }
 
-    console.log('check river for stage ' + process.env.STAGE);
+    
 } 
 
 const handler = async(event, context) => {

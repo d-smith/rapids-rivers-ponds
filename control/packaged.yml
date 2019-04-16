@@ -10,9 +10,56 @@ Parameters:
     Default: dev
     Type: String
 Resources:
+  LambdaExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - sqs:CreateQueue
+            - sqs:GetQueueUrl
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: AccessSQS
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: CreateAndWriteLogs
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - kinesis:GetRecords
+            - kinesis:GetShardIterator
+            - kinesis:DescribeStream
+            - kinesis:ListStreams
+            Effect: Allow
+            Resource:
+              Fn::ImportValue:
+                Fn::Join:
+                - '-'
+                - - ControlArn
+                  - Ref: Stage
+          Version: '2012-10-17'
+        PolicyName: StreamAccess
+    Type: AWS::IAM::Role
   StreamProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/47b1ef22d7aa9ac598e11d28731b0ebf
+      CodeUri: s3://sampack-97068/18e2aed1637772d9ebe154c27337e644
       Environment:
         Variables:
           STAGE:
@@ -23,7 +70,7 @@ Resources:
             BatchSize: 10
             StartingPosition: LATEST
             Stream:
-              Fn::Sub: arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/Rapids-${Stage}
+              Fn::Sub: arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/Control-${Stage}
           Type: Kinesis
       FunctionName:
         Fn::Join:
@@ -31,5 +78,9 @@ Resources:
         - - StreamProcessor
           - Ref: Stage
       Handler: control.handler
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
     Type: AWS::Serverless::Function
 Transform: AWS::Serverless-2016-10-31

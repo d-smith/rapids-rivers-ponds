@@ -28,7 +28,7 @@ const dispatchSubscribe = async (args, callback) => {
         }
     };
 
-    let res = await writeToRapids(streamName, args.river, event);
+    let res = await writeToRapids(controlStream, args.river, event);
     console.log(res);
 
     callback();
