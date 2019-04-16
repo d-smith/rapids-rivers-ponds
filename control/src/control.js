@@ -1,3 +1,5 @@
+const AWS = require('aws-sdk');
+var sqs = new AWS.SQS();
 
 let parseInput = (recordData) => {
     let buff = new Buffer(recordData, 'base64'); 
@@ -6,10 +8,10 @@ let parseInput = (recordData) => {
     return JSON.parse(text);
 }
 
-let dispatchCommand = (cmd) => {
+let dispatchCommand = async (cmd) => {
     switch(cmd.command) {
         case 'subscribe':
-            processSubscribe(cmd);
+            await processSubscribe(cmd);
             break;
         default:
             console.log(`Command not supported: ${JSON.stringify(cmd)}`);
@@ -17,12 +19,47 @@ let dispatchCommand = (cmd) => {
     }
 }
 
-let processSubscribe = (cmd) => {
+let formRiverQName = (river) => {
+    return `${river}${process.env.STAGE}`;
+}
+let hasRiver = async (river) => {
+    let riverQName = formRiverQName(river);
+    
+    console.log(`check to see if ${riverQName} exists`);
+    
+    try {
+        let response = await sqs.getQueueUrl({
+                QueueName: riverQName
+            }).promise();
+        console.log(response);
+
+        return true;
+    } catch(e) {
+        if(e.code == 'AWS.SimpleQueueService.NonExistentQueue') {
+            return false;
+        } else {
+            throw e;
+        }
+    }
+}
+
+let createRiver = async (river) => {
+    let riverQName = formRiverQName(river);
+    console.log(`create queue ${riverQName} for river ${river}`);
+}
+
+let processSubscribe = async (cmd) => {
     console.log(JSON.stringify(cmd));
     let river = cmd.commandArgs.river;
     let topic = cmd.commandArgs.topic;
 
     console.log(`subscribe ${river} to ${topic}`);
+    let riverExists = await hasRiver(river);
+    if(!riverExists) {
+        console.log('create river...');
+        await createRiver(river);
+    }
+
     console.log('check river for stage ' + process.env.STAGE);
 } 
 
@@ -33,7 +70,7 @@ const handler = async(event, context) => {
     for(rec of event['Records']) {
         try {
             parsed = parseInput(rec.kinesis.data);
-            dispatchCommand(parsed);
+            await dispatchCommand(parsed);
         } catch(e) {
             console.log(e); //This throws away the record - might want to write it to a DLQ
         }

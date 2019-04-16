@@ -1,0 +1,20 @@
+{
+    "Records": [
+        {
+            "kinesis": {
+                "kinesisSchemaVersion": "1.0",
+                "partitionKey": "myreviver",
+                "sequenceNumber": "49594852643320063777293050733358936002663900087909875714",
+                "data": "eyJjb21tYW5kIjoic3Vic2NyaWJlIiwiY29tbWFuZEFyZ3MiOnsicml2ZXIiOiJteXJldml2ZXIiLCJ0b3BpYyI6InRvcGljMSJ9fQ==",
+                "approximateArrivalTimestamp": 1555430600.408
+            },
+            "eventSource": "aws:kinesis",
+            "eventVersion": "1.0",
+            "eventID": "shardId-000000000000:49594852643320063777293050733358936002663900087909875714",
+            "eventName": "aws:kinesis:record",
+            "invokeIdentityArn": "arn:aws:iam::427848627088:role/control-plane-StreamProcessorRole-F1MXPS8YE242",
+            "awsRegion": "us-east-1",
+            "eventSourceARN": "arn:aws:kinesis:us-east-1:427848627088:stream/Rapids-dev"
+        }
+    ]
+}
