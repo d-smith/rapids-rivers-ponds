@@ -39,7 +39,7 @@ const handler = async(event) => {
     }).promise();
     console.log(deleteResponse);
     
-    return messages.map(m => m['Body']);
+    return messages.map(m => JSON.parse(m['Body']));
 
         
 }
