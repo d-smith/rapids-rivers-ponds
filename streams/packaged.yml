@@ -10,6 +10,57 @@ Parameters:
     Default: dev
     Type: String
 Resources:
+  BatchForRiver:
+    Properties:
+      CodeUri: s3://sampack-97068/3262ffbe68dc486918bf4290b5df4cd2
+      Environment:
+        Variables:
+          STAGE:
+            Ref: Stage
+      FunctionName:
+        Fn::Join:
+        - '-'
+        - - BatchForRiver
+          - Ref: Stage
+      Handler: batch4river.handler
+      Role:
+        Fn::GetAtt:
+        - BatchForRiverExecutionRole
+        - Arn
+      Timeout: 10
+    Type: AWS::Serverless::Function
+  BatchForRiverExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - sqs:ReceiveMessage
+            - sqs:GetQueueUrl
+            - sqs:DeleteMessage
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: AccessSQS
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: CreateAndWriteLogs
+    Type: AWS::IAM::Role
   ControlProcExecutionRole:
     Properties:
       AssumeRolePolicyDocument:
@@ -68,7 +119,7 @@ Resources:
     Type: AWS::IAM::Role
   ControlProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/c403c8b11d3d23e0d93346b2cc027f4c
+      CodeUri: s3://sampack-97068/3262ffbe68dc486918bf4290b5df4cd2
       Environment:
         Variables:
           STAGE:
@@ -155,7 +206,7 @@ Resources:
     Type: AWS::IAM::Role
   StreamProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/c403c8b11d3d23e0d93346b2cc027f4c
+      CodeUri: s3://sampack-97068/3262ffbe68dc486918bf4290b5df4cd2
       Environment:
         Variables:
           STAGE:

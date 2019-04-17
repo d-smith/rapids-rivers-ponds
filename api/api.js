@@ -8,9 +8,10 @@ AWS.config.update({
 });
 
 var kinesis = new AWS.Kinesis();
+var lambda = new AWS.Lambda();
 
 const writeToRapids = async (streamName, source, event) => {
-    console.log(`write ${JSON.stringify(event)} to rapids`);
+    //console.log(`write ${JSON.stringify(event)} to rapids`);
     let params = {
         Data: JSON.stringify(event),
         PartitionKey: source,
@@ -19,6 +20,19 @@ const writeToRapids = async (streamName, source, event) => {
 
     return kinesis.putRecord(params).promise();
 };
+
+const getMessageBatch = async (stage, river) => {
+    
+    let params = {
+        FunctionName: `BatchForRiver-${stage}`,
+        Payload: JSON.stringify({river: river})
+    }
+
+    let result = await lambda.invoke(params).promise();
+    let parsed = JSON.parse(result['Payload']);
+
+    return parsed;
+}
 
 
 // Create a river for the consumer if it is their first subscription,
@@ -44,6 +58,7 @@ const listConsumers = async () => {
 
 module.exports = {
     writeToRapids,
+    getMessageBatch,
     subscribeToService,
     registerProducer,
     listProducers,

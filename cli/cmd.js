@@ -1,10 +1,12 @@
 const vorpal = require('vorpal')();
 
 const writeToRapids = require('../api/api.js').writeToRapids;
+const getMessageBatch = require('../api/api.js').getMessageBatch;
 var program = require('commander');
 
 var streamName;
 var controlStream;
+var stage;
 
 const dispatchSend = async (args, callback) => {
     let event = {
@@ -14,13 +16,19 @@ const dispatchSend = async (args, callback) => {
     };
 
     let res = await writeToRapids(streamName, args.source, event);
-    console.log(res);
+    //console.log(res);
 
     callback();
 }
 
+const dispatchMessageBatch = async(args, callback) => {
+    let res = await getMessageBatch(stage, args.river);
+    console.log(res);
+    callback();
+}
+
 const dispatchSubscribe = async (args, callback) => {
-    console.log(`send control event ${JSON.stringify(args)}`);
+    //console.log(`send control event ${JSON.stringify(args)}`);
     let event = {
         command: 'subscribe',
         commandArgs: {
@@ -30,7 +38,7 @@ const dispatchSubscribe = async (args, callback) => {
     };
 
     let res = await writeToRapids(controlStream, args.river, event);
-    console.log(res);
+    //console.log(res);
 
     callback();
 }
@@ -45,6 +53,7 @@ program
     .version('0.0.1')
     .option('-c, --control-stream <controlStream>', 'Control stream name')
     .option('-r, --rapids <rapids>', 'Rapids stream name')
+    .option('-s, --stage <stage>', 'Stage name, e.g. dev')
     .parse(process.argv);
 
 vorpal
@@ -55,8 +64,13 @@ vorpal
     .command('subscribe <river> <topic>', 'Subscribe a river to a topic')
     .action(dispatchSubscribe);
 
+vorpal
+    .command('readfrom <river>', 'Get a batch of messages')
+    .action(dispatchMessageBatch);
+
 streamName = program.rapids;
 controlStream = program.controlStream;
+stage = program.stage;
 
 
 if(typeof streamName === 'undefined') {
@@ -67,6 +81,11 @@ if(typeof streamName === 'undefined') {
 if(typeof controlStream === 'undefined') {
     console.log('control stream name not given');
     process.exit(1);
+}
+
+if(typeof stage === 'undefined') {
+    console.log('stage not specified - default to dev');
+    stage = 'dev';
 }
 
 vorpal

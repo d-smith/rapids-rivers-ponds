@@ -12,6 +12,37 @@ We'll look at some of the subtlties in the implementation - use of different com
 
 ![](./rapids-rivers-ponds.png)
 
+This project provides a control plane stream used to subscribe rivers to topics and create queues on demand for rivers, a stream for the rivers, and a simple CLI to kick the tires.
+
+Here's a sample CLI session:
+
+```console
+lappy:cli ds$ node cmd.js --rapids Rapids-dev --control-stream Control-dev
+stage not specified - default to dev
+cmd > help
+
+  Commands:
+
+    help [command...]             Provides help for a given command.
+    exit                          Exits application.
+    send <event> <source> [data]  Publish event with optional data
+    subscribe <river> <topic>     Subscribe a river to a topic
+    readfrom <river>              Get a batch of messages
+
+cmd > subscribe MyApp ViewPage
+cmd > subscribe AnotherApp AnotherEvent
+cmd > readfrom MyApp
+[]
+cmd > send ViewPage TheSource '{"name":"Sally"}'
+cmd > readfrom MyApp
+[ { eventType: 'ViewPage',
+    eventDomain: 'TheSource',
+    payload: { name: 'Sally' } } ]
+cmd > readfrom AnotherApp
+[]
+cmd > 
+```
+
 ## Event structure
 
 When writing events to the rapids, we need some standard metadata to enable routing events to interested consumers and their associated rivers.

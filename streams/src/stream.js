@@ -41,7 +41,7 @@ const write2river = async (subPayloadTuple) => {
     }).promise().then(result => {
         return sqs.sendMessage({
             QueueUrl: result['QueueUrl'],
-            MessageBody: JSON.stringify(subPayloadTuple.decoded)
+            MessageBody: subPayloadTuple.decoded
         }).promise();
     }, reason => {
         throw new Error(reason);
