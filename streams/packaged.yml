@@ -68,7 +68,7 @@ Resources:
     Type: AWS::IAM::Role
   ControlProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/3309344265fa34ea5369dca07a13d354
+      CodeUri: s3://sampack-97068/c403c8b11d3d23e0d93346b2cc027f4c
       Environment:
         Variables:
           STAGE:
@@ -112,6 +112,7 @@ Resources:
           Statement:
           - Action:
             - sqs:SendMessage
+            - sqs:GetQueueUrl
             Effect: Allow
             Resource: '*'
           Version: '2012-10-17'
@@ -154,7 +155,7 @@ Resources:
     Type: AWS::IAM::Role
   StreamProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/3309344265fa34ea5369dca07a13d354
+      CodeUri: s3://sampack-97068/c403c8b11d3d23e0d93346b2cc027f4c
       Environment:
         Variables:
           STAGE:

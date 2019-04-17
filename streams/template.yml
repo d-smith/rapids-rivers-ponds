@@ -127,6 +127,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - sqs:SendMessage
+                  - sqs:GetQueueUrl
                 Resource: '*'
 
         - PolicyName: CreateAndWriteLogs
