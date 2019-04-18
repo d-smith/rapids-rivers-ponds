@@ -3,6 +3,7 @@ const vorpal = require('vorpal')();
 const writeToRapids = require('../api/api.js').writeToRapids;
 const getMessageBatch = require('../api/api.js').getMessageBatch;
 var program = require('commander');
+var chance = require('chance').Chance()
 
 var streamName;
 var controlStream;
@@ -12,7 +13,9 @@ const dispatchSend = async (args, callback) => {
     let event = {
         eventType: args.event,
         eventDomain: args.source,
-        payload: JSON.parse(args.data)
+        payload: JSON.parse(args.data),
+        timestamp: new Date().toISOString(),
+        eventId: chance.guid({version: 4})
     };
 
     let res = await writeToRapids(streamName, args.source, event);

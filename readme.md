@@ -37,7 +37,9 @@ cmd > send ViewPage TheSource '{"name":"Sally"}'
 cmd > readfrom MyApp
 [ { eventType: 'ViewPage',
     eventDomain: 'TheSource',
-    payload: { name: 'Sally' } } ]
+    payload: { name: 'Sally' },
+    timestamp: '2019-04-18T22:17:36.352Z',
+    eventId: '1f183791-82df-487f-84aa-224c024f79ba' } ]
 cmd > readfrom AnotherApp
 []
 cmd > 
