@@ -1,8 +1,3 @@
-Local invoke - subscriptions
-
-```console
-sam local invoke ControlProcessor -e subscribe-event.json -n sub-env.json
-```
 
 Local invoke - publish
 
