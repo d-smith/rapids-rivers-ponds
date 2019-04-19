@@ -1,0 +1,10 @@
+{
+    "ControlProcessor": {
+        "SUBTABLE":"Subscriptions-dev",
+        "STAGE":"dev"
+    },
+    "StreamProcessor": {
+        "SUBTABLE":"Subscriptions-dev",
+        "STAGE":"dev"
+    }
+}

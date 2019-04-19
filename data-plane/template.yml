@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  Rapid rivers data plane
+Globals:
+  Function:
+    Runtime: "nodejs8.10"
+
+Parameters:
+  Stage: 
+    Type: String
+    Default: dev
+
+Resources:
+
+
+  StreamProcessor:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ -, [StreamProcessor, !Ref "Stage"]]
+      Handler: stream.handler
+      CodeUri: src/
+      Role: !GetAtt [ StreamProcExecutionRole, Arn ]
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          SUBTABLE: !Join [-, [Subscriptions, !Ref 'Stage']]
+      Events:
+        StreamEvent:
+          Type: Kinesis
+          Properties:
+            Stream: !Sub 'arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/Rapids-${Stage}'
+            StartingPosition: LATEST
+            BatchSize: 10
+
+  StreamProcExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: AccessSQS
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:GetQueueUrl
+                Resource: '*'
+
+        - PolicyName: CreateAndWriteLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+        - PolicyName: WriteToDDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:Query
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}/index/SubsForTopic'
+
+                
+        - PolicyName: StreamAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kinesis:GetRecords
+                  - kinesis:GetShardIterator
+                  - kinesis:DescribeStream
+                  - kinesis:ListStreams
+                Resource: 
+                  Fn::ImportValue: 
+                    !Join ['-', [RapidsArn, !Ref 'Stage']]
+
+  BatchForRiver:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ -, [BatchForRiver, !Ref "Stage"]]
+      Handler: batch4river.handler
+      CodeUri: src/
+      Role: !GetAtt [ BatchForRiverExecutionRole, Arn ]
+      Timeout: 10
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+
+  BatchForRiverExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: AccessSQS
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:GetQueueUrl
+                  - sqs:DeleteMessage
+                Resource: '*'
+
+        - PolicyName: CreateAndWriteLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+                   
