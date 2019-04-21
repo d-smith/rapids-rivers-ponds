@@ -92,6 +92,13 @@ aws cloudformation create-stack --stack-name subs \
 --parameters ParameterKey=Stage,ParameterValue=dev
 ```
 
+To deploy the rapics topic:
+
+```console
+aws cloudformation create-stack --stack-name topic \
+--template-body file://cfn/topic.yml \
+--parameters ParameterKey=Stage,ParameterValue=dev
+```
 ### CLI
 
 Use the cli to send events and commands.
