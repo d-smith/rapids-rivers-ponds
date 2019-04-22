@@ -78,7 +78,7 @@ Resources:
     Type: AWS::IAM::Role
   ControlProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/fdc8a8e6acff53f14149056ce0cac60f
+      CodeUri: s3://sampack-97068/935d5c1283c5550790a81bf22d5d629b
       Environment:
         Variables:
           QUEUE_ARN_BASE:

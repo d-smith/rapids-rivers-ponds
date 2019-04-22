@@ -55,7 +55,7 @@ const createRiver = async (river) => {
     console.log(response);
 }
 
-const recordSubscription = async (river, topic) => {
+const recordSubscription = async (river, topic, subscriptionArn) => {
     console.log(`add sub to table ${process.env.SUBTABLE}`);
     let params = {
         Item: {
@@ -64,6 +64,9 @@ const recordSubscription = async (river, topic) => {
             },
             "Topic": {
                 S: topic
+            },
+            "SubscriptionArn": {
+                S: subscriptionArn
             }
         },
         TableName: process.env.SUBTABLE
@@ -135,12 +138,17 @@ const enableTopicSendToQueue = async (river, topics) => {
 const subscribeRiverToTopic = async (river, topic) => {
     
 
+    //TODO - logic to find sub and just update filter instead of making 
+    //new sub
+    
     //Grab all the subscriptions we know about
     let topics =  await getTopicSubsForRiver(river);
     console.log(topics);
 
     //Allow topic to send to queue
-    await enableTopicSendToQueue(river, topics);
+    if(topics.length == 1) {
+        await enableTopicSendToQueue(river, topics);
+    }; 
 
     //Bake them into a FilterPolicy
     let filterPolicy = {
@@ -154,11 +162,13 @@ const subscribeRiverToTopic = async (river, topic) => {
         Endpoint: `${process.env.QUEUE_ARN_BASE}${formRiverQName(river)}`,
         Attributes: {
             FilterPolicy: JSON.stringify(filterPolicy)
-        }
+        },
+        ReturnSubscriptionArn: true
     }
 
     let response = await sns.subscribe(params).promise();
     console.log(response);
+    return response['SubscriptionArn'];
 };
 
 let processSubscribe = async (cmd) => {
@@ -176,11 +186,11 @@ let processSubscribe = async (cmd) => {
         console.log('river exists... subscribe');
     }
 
-    console.log('record subscription');
-    await recordSubscription(river, topic);
-
     console.log('subscribe river to topic');
-    await subscribeRiverToTopic(river, topic);
+    let subscriptionArn = await subscribeRiverToTopic(river, topic);
+
+    console.log('record subscription');
+    await recordSubscription(river, topic, subscriptionArn);
 } 
 
 const handler = async(event, context) => {
