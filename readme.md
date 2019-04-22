@@ -92,7 +92,7 @@ aws cloudformation create-stack --stack-name subs \
 --parameters ParameterKey=Stage,ParameterValue=dev
 ```
 
-To deploy the rapics topic:
+To deploy the rapids topic:
 
 ```console
 aws cloudformation create-stack --stack-name topic \
