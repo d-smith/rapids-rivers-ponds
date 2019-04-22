@@ -3,7 +3,8 @@
         "SUBTABLE":"Subscriptions-dev",
         "STAGE":"dev",
         "TOPIC_ARN":"arn:aws:sns:us-east-1:427848627088:Rapids-dev",
-        "QUEUE_ARN_BASE":"arn:aws:sqs:us-east-1:427848627088:"
+        "QUEUE_ARN_BASE":"arn:aws:sqs:us-east-1:427848627088:",
+        "QUEUE_URL_BASE":"https://sqs.us-east-1.amazonaws.com/427848627088/"
     },
     "StreamProcessor": {
         "SUBTABLE":"Subscriptions-dev",

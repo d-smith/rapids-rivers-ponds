@@ -27,6 +27,7 @@ Resources:
           TOPIC_ARN:
             Fn::ImportValue: !Join [-, [TopicArn, !Ref 'Stage']]
           QUEUE_ARN_BASE: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:'
+          QUEUE_URL_BASE: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/'
       Events:
         StreamEvent:
           Type: Kinesis
@@ -55,6 +56,7 @@ Resources:
                 Action:
                   - sqs:CreateQueue
                   - sqs:GetQueueUrl
+                  - sqs:SetQueueAttributes
                 Resource: '*'
 
         - PolicyName: AccessSNS

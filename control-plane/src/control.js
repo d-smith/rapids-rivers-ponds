@@ -92,10 +92,55 @@ const getTopicSubsForRiver = async (river) => {
     return items.map(i => {return i["Topic"]["S"]});
 }
 
+const enableTopicSendToQueue = async (river, topics) => {
+    let statements = [];
+    for(t of topics) {
+        console.log(`add statement for topic ${t}`);
+        let statement = {
+            Effect: "Allow",
+            Principal: {
+                AWS: "*"
+            },
+            Action: "SQS:SendMessage",
+            Resource: `${process.env.QUEUE_ARN_BASE}${formRiverQName(river)}`,
+            Condition: {
+                ArnEquals: {
+                    "aws:SourceArn":process.env.TOPIC_ARN
+                }
+            }
+        }
+
+        statements.push(statement)
+    }
+
+    let queuePolicy = {
+        Version: '2012-10-17',
+        Id: `${process.env.QUEUE_ARN_BASE}${formRiverQName(river)}/MySQSPolicy`,
+        Statement: statements
+    }
+
+    let params = {
+        Attributes: {
+            Policy: JSON.stringify(queuePolicy)
+        },
+        QueueUrl: `${process.env.QUEUE_URL_BASE}${formRiverQName(river)}`
+    };
+
+    console.log(JSON.stringify(params));
+
+    let response = await sqs.setQueueAttributes(params).promise();
+    console.log(response);
+}
+
 const subscribeRiverToTopic = async (river, topic) => {
+    
+
     //Grab all the subscriptions we know about
     let topics =  await getTopicSubsForRiver(river);
     console.log(topics);
+
+    //Allow topic to send to queue
+    await enableTopicSendToQueue(river, topics);
 
     //Bake them into a FilterPolicy
     let filterPolicy = {

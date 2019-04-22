@@ -26,6 +26,7 @@ Resources:
           - Action:
             - sqs:CreateQueue
             - sqs:GetQueueUrl
+            - sqs:SetQueueAttributes
             Effect: Allow
             Resource: '*'
           Version: '2012-10-17'
@@ -77,11 +78,13 @@ Resources:
     Type: AWS::IAM::Role
   ControlProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/16bef8da56f00009654f8c822b228e46
+      CodeUri: s3://sampack-97068/fdc8a8e6acff53f14149056ce0cac60f
       Environment:
         Variables:
           QUEUE_ARN_BASE:
             Fn::Sub: 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:'
+          QUEUE_URL_BASE:
+            Fn::Sub: https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/
           STAGE:
             Ref: Stage
           SUBTABLE:
