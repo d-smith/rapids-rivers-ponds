@@ -2,8 +2,8 @@
     "ControlProcessor": {
         "SUBTABLE":"Subscriptions-dev",
         "STAGE":"dev",
-        "TOPIC_ARN":"your_value_here",
-        "QUEUE_ARN_BASE":"your_value_here"
+        "TOPIC_ARN":"arn:aws:sns:us-east-1:427848627088:Rapids-dev",
+        "QUEUE_ARN_BASE":"arn:aws:sqs:us-east-1:427848627088:"
     },
     "StreamProcessor": {
         "SUBTABLE":"Subscriptions-dev",

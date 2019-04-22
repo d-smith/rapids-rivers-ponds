@@ -19,10 +19,14 @@ Resources:
       Handler: control.handler
       CodeUri: src/
       Role: !GetAtt [ ControlProcExecutionRole, Arn ]
+      Timeout: 10
       Environment:
         Variables:
           STAGE: !Ref Stage
           SUBTABLE: !Join [-, [Subscriptions, !Ref 'Stage']]
+          TOPIC_ARN:
+            Fn::ImportValue: !Join [-, [TopicArn, !Ref 'Stage']]
+          QUEUE_ARN_BASE: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:'
       Events:
         StreamEvent:
           Type: Kinesis
@@ -53,6 +57,15 @@ Resources:
                   - sqs:GetQueueUrl
                 Resource: '*'
 
+        - PolicyName: AccessSNS
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Subscribe
+                Resource: '*'
+
         - PolicyName: CreateAndWriteLogs
           PolicyDocument:
             Version: '2012-10-17'
@@ -71,6 +84,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - dynamodb:PutItem
+                  - dynamodb:Query
                 Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}'
 
                 

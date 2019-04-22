@@ -1,1 +1,0 @@
-This version of the control plane will subscribe queues to topics using subscription filters. We'll then subscribe queues to that so the stream reader only has to publish to a topic. We'll still record subscriptions - could be useful information for many reasons.
