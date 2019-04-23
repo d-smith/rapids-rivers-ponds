@@ -6,9 +6,7 @@ Example implementation of Fred George style microservices architecture
 
 This project illustrates one way to implement the rapids, rivers, ponds approad to microservice architecture using AWS technology components.
 
-Here, we'll use Kinesis for our main event bus (rapids). We'll use a simple stream reader to pick off events and write them to various queues (rivers), with services consuming messages in the rivers. Services may persist events or data derived from events or produced by application logic in datastores of choice (ponds).
-
-We'll look at some of the subtlties in the implementation - use of different compute and database components, how we might dispatch to SNS topics for the rivers, etc.
+Here, we'll use Kinesis for our main event bus (rapids). We'll use a simple stream reader to pick off events and publish them to an SNS topic, and use filter topic subscriptions to populate SQS queues (rivers), with services consuming messages from the rivers. Services may persist events or data derived from events or produced by application logic in datastores of choice (ponds).
 
 ![](./rapids-rivers-ponds.png)
 
@@ -57,23 +55,9 @@ We'll assume a JSON event structure that includes some standard fields:
 * timestamp - ISO 8601 UTC timestamp
 * eventId - uuid
 
-## Scenario
 
-From the video, we'll ape the travel scenario where Sally views a page, and an offer engine assembles offers based on events consumed and produced by membership, segmentation, location, and brand services.
 
-For this scenario, we'll have rivers for the services and offers engine, and a single rapids. The rapids will be a Kinesis stream, the rivers SQS queues. We'll also have a river for those interested in consuming offers.
-
-The scenario is this:
-
-* An event conveying Sally is looking at a page is emitted.
-    * The location and brand services respond to the event with some baseline offer events. 
-    * The segmenation service responds to the event by emitting an event stating Sally is a Road Warrior
-    * The membership services response by emitting an event stating Sally is a Platinum member
-* The location and services emit a new offers based on Sally being a Road Warrior
-* The location service emits a new offer based on SAlly being both a Road Warrior and a Platimum member
-* The offer engine will buffer offers for some amount of time, then emit offers
-
-### Deploying Rapids and Rivers
+## Deploying Rapids and Rivers
 
 To deploy the rapids:
 
@@ -99,7 +83,7 @@ aws cloudformation create-stack --stack-name topic \
 --template-body file://cfn/topic.yml \
 --parameters ParameterKey=Stage,ParameterValue=dev
 ```
-### CLI
+## CLI
 
 Use the cli to send events and commands.
 
@@ -119,6 +103,24 @@ To send a view page event:
 ```console
 cmd > send ViewPage TheSource '{"name":"Sally"}'
 ```
+
+## Scenario
+
+In progress...
+
+From the video, we'll ape the travel scenario where Sally views a page, and an offer engine assembles offers based on events consumed and produced by membership, segmentation, location, and brand services.
+
+For this scenario, we'll have rivers for the services and offers engine, and a single rapids. The rapids will be a Kinesis stream, the rivers SQS queues. We'll also have a river for those interested in consuming offers.
+
+The scenario is this:
+
+* An event conveying Sally is looking at a page is emitted.
+    * The location and brand services respond to the event with some baseline offer events. 
+    * The segmenation service responds to the event by emitting an event stating Sally is a Road Warrior
+    * The membership services response by emitting an event stating Sally is a Platinum member
+* The location and services emit a new offers based on Sally being a Road Warrior
+* The location service emits a new offer based on SAlly being both a Road Warrior and a Platimum member
+* The offer engine will buffer offers for some amount of time, then emit offers
 
 ## Background
 
