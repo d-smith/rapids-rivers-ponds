@@ -4,7 +4,7 @@
         "STAGE":"dev"
     },
     "StreamProcessor": {
-        "SUBTABLE":"Subscriptions-dev",
-        "STAGE":"dev"
+        "STAGE":"dev",
+        "TOPIC_ARN":"my_topic_arn"
     }
 }
