@@ -24,7 +24,8 @@ Resources:
       Environment:
         Variables:
           STAGE: !Ref Stage
-          SUBTABLE: !Join [-, [Subscriptions, !Ref 'Stage']]
+          TOPIC_ARN:
+            Fn::ImportValue: !Join [-, [TopicArn, !Ref 'Stage']]
       Events:
         StreamEvent:
           Type: Kinesis
@@ -45,15 +46,15 @@ Resources:
             Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-        - PolicyName: AccessSQS
+        - PolicyName: AccessSNS
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
-                  - sqs:SendMessage
-                  - sqs:GetQueueUrl
-                Resource: '*'
+                  - sns:Publish
+                Resource:
+                  Fn::ImportValue: !Join [-, [TopicArn, !Ref 'Stage']]
 
         - PolicyName: CreateAndWriteLogs
           PolicyDocument:
