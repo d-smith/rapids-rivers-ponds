@@ -66,6 +66,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - sns:Subscribe
+                  - sns:SetSubscriptionAttributes
                 Resource: '*'
 
         - PolicyName: CreateAndWriteLogs

@@ -35,6 +35,7 @@ Resources:
           Statement:
           - Action:
             - sns:Subscribe
+            - sns:SetSubscriptionAttributes
             Effect: Allow
             Resource: '*'
           Version: '2012-10-17'
@@ -78,7 +79,7 @@ Resources:
     Type: AWS::IAM::Role
   ControlProcessor:
     Properties:
-      CodeUri: s3://sampack-97068/935d5c1283c5550790a81bf22d5d629b
+      CodeUri: s3://sampack-97068/80ddc9d1f7d6c8451878e9e21ecb18a4
       Environment:
         Variables:
           QUEUE_ARN_BASE:

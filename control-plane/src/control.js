@@ -84,7 +84,6 @@ const getTopicSubsForRiver = async (river) => {
             }
         },
         KeyConditionExpression: "Subscriber = :sv",
-        ProjectionExpression: 'Topic',
         TableName: process.env.SUBTABLE
     };
 
@@ -92,29 +91,34 @@ const getTopicSubsForRiver = async (river) => {
     console.log(JSON.stringify(response));
     let items = response["Items"];
 
-    return items.map(i => {return i["Topic"]["S"]});
+    let topics = items.map(i => {return i["Topic"]["S"]});
+    let subArn = '';
+    if(items.length > 0) {
+        subArn = items[0]["SubscriptionArn"]["S"];
+    }
+
+    return {subscriptionArn: subArn, topics: topics};
 }
 
-const enableTopicSendToQueue = async (river, topics) => {
+const enableTopicSendToQueue = async (river, topic) => {
+
     let statements = [];
-    for(t of topics) {
-        console.log(`add statement for topic ${t}`);
-        let statement = {
-            Effect: "Allow",
-            Principal: {
-                AWS: "*"
-            },
-            Action: "SQS:SendMessage",
-            Resource: `${process.env.QUEUE_ARN_BASE}${formRiverQName(river)}`,
-            Condition: {
-                ArnEquals: {
-                    "aws:SourceArn":process.env.TOPIC_ARN
-                }
+    console.log(`add statement for topic ${topic}`);
+    let statement = {
+        Effect: "Allow",
+        Principal: {
+            AWS: "*"
+        },
+        Action: "SQS:SendMessage",
+        Resource: `${process.env.QUEUE_ARN_BASE}${formRiverQName(river)}`,
+        Condition: {
+            ArnEquals: {
+                "aws:SourceArn":process.env.TOPIC_ARN
             }
         }
-
-        statements.push(statement)
     }
+
+    statements.push(statement)
 
     let queuePolicy = {
         Version: '2012-10-17',
@@ -138,16 +142,19 @@ const enableTopicSendToQueue = async (river, topics) => {
 const subscribeRiverToTopic = async (river, topic) => {
     
 
-    //TODO - logic to find sub and just update filter instead of making 
     //new sub
+    let topicSubResults =  await getTopicSubsForRiver(river);
+    let topics = topicSubResults.topics;
+    let numberOfPreviousTopics = topics.length;
+    console.log(topicSubResults);
     
-    //Grab all the subscriptions we know about
-    let topics =  await getTopicSubsForRiver(river);
-    console.log(topics);
+
+    //Add the new event type topic to the list to subscribe to
+    topics.push(topic);
 
     //Allow topic to send to queue
-    if(topics.length == 1) {
-        await enableTopicSendToQueue(river, topics);
+    if(numberOfPreviousTopics == 0) {
+        await enableTopicSendToQueue(river, topic);
     }; 
 
     //Bake them into a FilterPolicy
@@ -155,7 +162,25 @@ const subscribeRiverToTopic = async (river, topic) => {
         event_type: topics
     };
 
+    console.log(filterPolicy);
+
+    if(numberOfPreviousTopics > 0) {
+        console.log('update subscription policy');
+        //Update filter policy
+        let params = {
+            AttributeName: 'FilterPolicy',
+            SubscriptionArn: topicSubResults.subscriptionArn,
+            AttributeValue: JSON.stringify(filterPolicy)
+        };
+
+        let result = await sns.setSubscriptionAttributes(params).promise();
+        console.log(result);
+        return 'previouslyRecorded';
+
+    } 
+
     //Subscribe the queue to the topic with the update filter policy
+    console.log('subscribe queue to topic');
     let params = {
         TopicArn: process.env.TOPIC_ARN,
         Protocol: 'sqs',
@@ -190,7 +215,9 @@ let processSubscribe = async (cmd) => {
     let subscriptionArn = await subscribeRiverToTopic(river, topic);
 
     console.log('record subscription');
-    await recordSubscription(river, topic, subscriptionArn);
+    if(subscriptionArn != 'previouslyRecorded') {
+        await recordSubscription(river, topic, subscriptionArn);
+    }
 } 
 
 const handler = async(event, context) => {
