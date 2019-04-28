@@ -46,6 +46,22 @@ const dispatchSubscribe = async (args, callback) => {
     callback();
 }
 
+const dispatchUnsubscribe = async (args, callback) => {
+    //console.log(`send control event ${JSON.stringify(args)}`);
+    let event = {
+        command: 'unsubscribe',
+        commandArgs: {
+            river: args.river,
+            topic: args.topic
+        }
+    };
+
+    let res = await writeToRapids(controlStream, args.river, event);
+    //console.log(res);
+
+    callback();
+}
+
 const setStream = async(args, callback) => {
     console.log(`stream is ${args.stream}`);
     streamName = args.stream;
@@ -70,6 +86,11 @@ vorpal
 vorpal
     .command('readfrom <river>', 'Get a batch of messages')
     .action(dispatchMessageBatch);
+
+
+vorpal
+    .command('unsubscribe <river> <topic>', 'Remove a topic from a river subscription')
+    .action(dispatchUnsubscribe);
 
 streamName = program.rapids;
 controlStream = program.controlStream;
