@@ -15,6 +15,9 @@ let dispatchCommand = async (cmd) => {
         case 'subscribe':
             await processSubscribe(cmd);
             break;
+        case 'unsubscribe':
+            await processUnsubscribe(cmd);
+            break;
         default:
             console.log(`Command not supported: ${JSON.stringify(cmd)}`);
             break;
@@ -219,6 +222,13 @@ let processSubscribe = async (cmd) => {
         await recordSubscription(river, topic, subscriptionArn);
     }
 } 
+
+const processUnsubscribe = async(cmd) => {
+    let river = cmd.commandArgs.river;
+    let topic = cmd.commandArgs.topic;
+
+    console.log(`unsubscribe ${river} to ${topic}`);
+}
 
 const handler = async(event, context) => {
     console.log(JSON.stringify(event));
