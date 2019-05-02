@@ -19,7 +19,7 @@ Resources:
       Handler: control.handler
       CodeUri: src/
       Role: !GetAtt [ ControlProcExecutionRole, Arn ]
-      Timeout: 10
+      Timeout: 20
       Environment:
         Variables:
           STAGE: !Ref Stage

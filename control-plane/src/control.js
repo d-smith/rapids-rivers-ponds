@@ -80,6 +80,7 @@ const recordSubscription = async (river, topic, subscriptionArn) => {
 }
 
 const getTopicSubsForRiver = async (river) => {
+    console.log('query db for subs');
     let params = {
         ExpressionAttributeValues: {
             ":sv": {
@@ -91,6 +92,7 @@ const getTopicSubsForRiver = async (river) => {
     };
 
     let response = await dynamodb.query(params).promise();
+    console.log('db query returns')
     console.log(JSON.stringify(response));
     let items = response["Items"];
 
@@ -228,6 +230,9 @@ const processUnsubscribe = async(cmd) => {
     let topic = cmd.commandArgs.topic;
 
     console.log(`unsubscribe ${river} to ${topic}`);
+
+    let topicSubResults =  await getTopicSubsForRiver(river);
+    console.log(`subs for river: ${JSON.stringify(topicSubResults)}`);
 }
 
 const handler = async(event, context) => {
