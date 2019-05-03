@@ -2,6 +2,8 @@ const AWS = require('aws-sdk');
 var sqs = new AWS.SQS();
 var dynamodb = new AWS.DynamoDB();
 var sns = new AWS.SNS();
+const processUnsubscribe = require('./unsub').processUnsubscribe;
+const getTopicSubsForRiver = require('./common').getTopicSubsForRiver;
 
 let parseInput = (recordData) => {
     let buff = new Buffer(recordData, 'base64'); 
@@ -79,31 +81,7 @@ const recordSubscription = async (river, topic, subscriptionArn) => {
     console.log(response);
 }
 
-const getTopicSubsForRiver = async (river) => {
-    console.log('query db for subs');
-    let params = {
-        ExpressionAttributeValues: {
-            ":sv": {
-                S: river
-            }
-        },
-        KeyConditionExpression: "Subscriber = :sv",
-        TableName: process.env.SUBTABLE
-    };
 
-    let response = await dynamodb.query(params).promise();
-    console.log('db query returns')
-    console.log(JSON.stringify(response));
-    let items = response["Items"];
-
-    let topics = items.map(i => {return i["Topic"]["S"]});
-    let subArn = '';
-    if(items.length > 0) {
-        subArn = items[0]["SubscriptionArn"]["S"];
-    }
-
-    return {subscriptionArn: subArn, topics: topics};
-}
 
 const enableTopicSendToQueue = async (river, topic) => {
 
@@ -225,15 +203,7 @@ let processSubscribe = async (cmd) => {
     }
 } 
 
-const processUnsubscribe = async(cmd) => {
-    let river = cmd.commandArgs.river;
-    let topic = cmd.commandArgs.topic;
 
-    console.log(`unsubscribe ${river} to ${topic}`);
-
-    let topicSubResults =  await getTopicSubsForRiver(river);
-    console.log(`subs for river: ${JSON.stringify(topicSubResults)}`);
-}
 
 const handler = async(event, context) => {
     console.log(JSON.stringify(event));
