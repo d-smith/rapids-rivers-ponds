@@ -5,7 +5,7 @@ var sns = new AWS.SNS();
 
 const getTopicSubsForRiver = require('./common').getTopicSubsForRiver;
 
-const removeTopicFromFilterPolicy = async (topic, subs) => {
+const removeTopicFromFilterPolicy = async (river, topic, subs) => {
     console.log(`remove ${topic} from ${JSON.stringify(subs)}`);
 
     let {subscriptionArn, topics} = subs;
@@ -17,8 +17,31 @@ const removeTopicFromFilterPolicy = async (topic, subs) => {
     console.log(`new filter policy ${JSON.stringify(filterPolicy)}`);
 
     //Update subscription attributes with new policy
+    let params = {
+        AttributeName: 'FilterPolicy',
+        SubscriptionArn: subscriptionArn,
+        AttributeValue: JSON.stringify(filterPolicy)
+    };
+
+    let result = await sns.setSubscriptionAttributes(params).promise();
+    console.log(result);
 
     //Remove subscription from table
+    let deleteParams = {
+        Key: {
+            "Subscriber": {
+                S: river
+            },
+            "Topic": {
+                S: topic
+            }
+        },
+        TableName: process.env.SUBTABLE
+    };
+
+    let response = await dynamodb.deleteItem(deleteParams).promise();
+    console.log(response);
+
 
 };
 
@@ -28,12 +51,12 @@ const removeSubscription = async (subs) => {
 
 const unsubscribeTopic = async(river, topic, subs) => {
     if(subs.topics && subs.topics.filter(t => t == topic).length == 0) {
-        console.log('nothing to subscribe');
+        console.log('nothing to unsubscribe');
         return;
     }
 
     if(subs.topics && subs.topics.length > 1) {
-        await removeTopicFromFilterPolicy(topic, subs);
+        await removeTopicFromFilterPolicy(river, topic, subs);
     } else {
         await removeSubscription(subs);
     }
