@@ -158,7 +158,7 @@ const subscribeRiverToTopic = async (river, topic) => {
 
         let result = await sns.setSubscriptionAttributes(params).promise();
         console.log(result);
-        return 'previouslyRecorded';
+        return topicSubResults.subscriptionArn;
 
     } 
 
@@ -198,9 +198,9 @@ let processSubscribe = async (cmd) => {
     let subscriptionArn = await subscribeRiverToTopic(river, topic);
 
     console.log('record subscription');
-    if(subscriptionArn != 'previouslyRecorded') {
+    //if(subscriptionArn != 'previouslyRecorded') {
         await recordSubscription(river, topic, subscriptionArn);
-    }
+    //}
 } 
 
 
