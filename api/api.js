@@ -35,33 +35,24 @@ const getMessageBatch = async (stage, river) => {
 }
 
 
-// Create a river for the consumer if it is their first subscription,
-// otherwise record the desire to recieve messages.
-const subscribeToService = async (consumer, service) => {
 
+const listSubscriptions = async (stage, river) => {
+    let params = {
+        FunctionName: `ListSubs-${stage}`,
+        Payload: JSON.stringify({river: river})
+    }
+
+    let result = await lambda.invoke(params).promise();
+    let parsed = JSON.parse(result['Payload']);
+
+    return parsed;
 }
 
-// Register a producer of events.
-const registerProducer= async(service) => {
 
-}
-
-// List producers
-const listProducers = async () => {
-
-}
-
-//List consumers
-const listConsumers = async () => {
-
-}
 
 module.exports = {
     writeToRapids,
     getMessageBatch,
-    subscribeToService,
-    registerProducer,
-    listProducers,
-    listConsumers
+    listSubscriptions
 };
 
