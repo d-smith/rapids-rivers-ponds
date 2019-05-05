@@ -5,6 +5,24 @@ var sns = new AWS.SNS();
 
 const getTopicSubsForRiver = require('./common').getTopicSubsForRiver;
 
+const removeSubscriptionRecord = async (river, topic) => {
+    //Remove subscription from table
+    let deleteParams = {
+        Key: {
+            "Subscriber": {
+                S: river
+            },
+            "Topic": {
+                S: topic
+            }
+        },
+        TableName: process.env.SUBTABLE
+    };
+
+    let response = await dynamodb.deleteItem(deleteParams).promise();
+    console.log(response);
+};
+
 const removeTopicFromFilterPolicy = async (river, topic, subs) => {
     console.log(`remove ${topic} from ${JSON.stringify(subs)}`);
 
@@ -27,26 +45,23 @@ const removeTopicFromFilterPolicy = async (river, topic, subs) => {
     console.log(result);
 
     //Remove subscription from table
-    let deleteParams = {
-        Key: {
-            "Subscriber": {
-                S: river
-            },
-            "Topic": {
-                S: topic
-            }
-        },
-        TableName: process.env.SUBTABLE
-    };
-
-    let response = await dynamodb.deleteItem(deleteParams).promise();
-    console.log(response);
-
-
+    await removeSubscriptionRecord(river, topic);
 };
 
-const removeSubscription = async (subs) => {
+const removeSubscription = async (river, topic, subs) => {
+    if(topic != subs.topics[0]) {
+        throw new Error('internal error: topic to remove not aligned with topic subscribed to');
+    }
+    
     console.log(`remove ${JSON.stringify(subs)}`);
+    let params = {
+        SubscriptionArn: subs.subscriptionArn
+    };
+
+    let response = await sns.unsubscribe(params).promise();
+    console.log(response);
+
+    await removeSubscriptionRecord(river, topic);
 };
 
 const unsubscribeTopic = async(river, topic, subs) => {
@@ -58,7 +73,7 @@ const unsubscribeTopic = async(river, topic, subs) => {
     if(subs.topics && subs.topics.length > 1) {
         await removeTopicFromFilterPolicy(river, topic, subs);
     } else {
-        await removeSubscription(subs);
+        await removeSubscription(river, topic, subs);
     }
 }
 
