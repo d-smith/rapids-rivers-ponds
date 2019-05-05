@@ -62,6 +62,11 @@ const dispatchUnsubscribe = async (args, callback) => {
     callback();
 }
 
+const dispatchListSubs = async (args, callback) => {
+    console.log('list subs');
+    callback();
+}
+
 const setStream = async(args, callback) => {
     console.log(`stream is ${args.stream}`);
     streamName = args.stream;
@@ -86,6 +91,10 @@ vorpal
 vorpal
     .command('readfrom <river>', 'Get a batch of messages')
     .action(dispatchMessageBatch);
+
+vorpal
+    .command('listsubs <river>', 'List subscriptions for a river')
+    .action(dispatchListSubs);
 
 
 vorpal
