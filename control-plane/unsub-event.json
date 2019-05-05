@@ -5,7 +5,7 @@
                 "kinesisSchemaVersion": "1.0",
                 "partitionKey": "myreviver",
                 "sequenceNumber": "49594852643320063777293050733358936002663900087909875714",
-                "data": "eyJjb21tYW5kIjogInN1YnNjcmliZSIsImNvbW1hbmRBcmdzIjogeyJyaXZlciI6ICJmb28iLCJ0b3BpYyI6ICJiYXIifX0K",
+                "data": "eyJjb21tYW5kIjogInVuc3Vic2NyaWJlIiwiY29tbWFuZEFyZ3MiOiB7InJpdmVyIjogImZvbyIsInRvcGljIjogImJhciJ9fQo=",
                 "approximateArrivalTimestamp": 1555430600.408
             },
             "eventSource": "aws:kinesis",

@@ -2,6 +2,8 @@ const AWS = require('aws-sdk');
 var sqs = new AWS.SQS();
 var dynamodb = new AWS.DynamoDB();
 var sns = new AWS.SNS();
+const processUnsubscribe = require('./unsub').processUnsubscribe;
+const getTopicSubsForRiver = require('./common').getTopicSubsForRiver;
 
 let parseInput = (recordData) => {
     let buff = new Buffer(recordData, 'base64'); 
@@ -14,6 +16,9 @@ let dispatchCommand = async (cmd) => {
     switch(cmd.command) {
         case 'subscribe':
             await processSubscribe(cmd);
+            break;
+        case 'unsubscribe':
+            await processUnsubscribe(cmd);
             break;
         default:
             console.log(`Command not supported: ${JSON.stringify(cmd)}`);
@@ -76,29 +81,7 @@ const recordSubscription = async (river, topic, subscriptionArn) => {
     console.log(response);
 }
 
-const getTopicSubsForRiver = async (river) => {
-    let params = {
-        ExpressionAttributeValues: {
-            ":sv": {
-                S: river
-            }
-        },
-        KeyConditionExpression: "Subscriber = :sv",
-        TableName: process.env.SUBTABLE
-    };
 
-    let response = await dynamodb.query(params).promise();
-    console.log(JSON.stringify(response));
-    let items = response["Items"];
-
-    let topics = items.map(i => {return i["Topic"]["S"]});
-    let subArn = '';
-    if(items.length > 0) {
-        subArn = items[0]["SubscriptionArn"]["S"];
-    }
-
-    return {subscriptionArn: subArn, topics: topics};
-}
 
 const enableTopicSendToQueue = async (river, topic) => {
 
@@ -175,7 +158,7 @@ const subscribeRiverToTopic = async (river, topic) => {
 
         let result = await sns.setSubscriptionAttributes(params).promise();
         console.log(result);
-        return 'previouslyRecorded';
+        return topicSubResults.subscriptionArn;
 
     } 
 
@@ -215,10 +198,12 @@ let processSubscribe = async (cmd) => {
     let subscriptionArn = await subscribeRiverToTopic(river, topic);
 
     console.log('record subscription');
-    if(subscriptionArn != 'previouslyRecorded') {
+    //if(subscriptionArn != 'previouslyRecorded') {
         await recordSubscription(river, topic, subscriptionArn);
-    }
+    //}
 } 
+
+
 
 const handler = async(event, context) => {
     console.log(JSON.stringify(event));
