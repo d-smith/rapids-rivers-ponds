@@ -2,6 +2,7 @@ const vorpal = require('vorpal')();
 
 const writeToRapids = require('../api/api.js').writeToRapids;
 const getMessageBatch = require('../api/api.js').getMessageBatch;
+const listSubscriptions = require('../api/api.js').listSubscriptions;
 var program = require('commander');
 var chance = require('chance').Chance()
 
@@ -62,6 +63,12 @@ const dispatchUnsubscribe = async (args, callback) => {
     callback();
 }
 
+const dispatchListSubs = async (args, callback) => {
+    let res = await listSubscriptions(stage, args.river);
+    console.log(res);
+    callback();
+}
+
 const setStream = async(args, callback) => {
     console.log(`stream is ${args.stream}`);
     streamName = args.stream;
@@ -86,6 +93,10 @@ vorpal
 vorpal
     .command('readfrom <river>', 'Get a batch of messages')
     .action(dispatchMessageBatch);
+
+vorpal
+    .command('listsubs <river>', 'List subscriptions for a river')
+    .action(dispatchListSubs);
 
 
 vorpal

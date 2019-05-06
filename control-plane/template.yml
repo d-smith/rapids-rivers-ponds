@@ -108,5 +108,51 @@ Resources:
                     !Join ['-', [ControlArn, !Ref 'Stage']]
 
 
+  ListSubs:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ -, [ListSubs, !Ref "Stage"]]
+      Handler: listsubs.handler
+      CodeUri: src/
+      Role: !GetAtt [ ListSubsExecutionRole, Arn ]
+      Timeout: 20
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          SUBTABLE: !Join [-, [Subscriptions, !Ref 'Stage']]
+          
+
+  ListSubsExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+
+        - PolicyName: CreateAndWriteLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+        - PolicyName: ReadFromDDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:Query
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}'
 
                    
