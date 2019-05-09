@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Keep track advertised topics
+
+Parameters:
+  Stage:
+    Type: String
+    Description: stage/environment discriminator to allow instantiating multiple stacks in the same account/region
+
+Resources:
+
+  Topics:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: Topic
+          AttributeType: S
+      KeySchema:
+        - 
+          AttributeName: Topic
+          KeyType: HASH
+
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+      TableName: !Sub Topics-${Stage}
+      
+          
+      
+Outputs:
+  Tablename:
+    Value: !Ref Topics
+    Export:
+      Name:
+        !Join [-, [Topics, !Ref 'Stage']]
