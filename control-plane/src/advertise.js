@@ -4,6 +4,20 @@ var dynamodb = new AWS.DynamoDB();
 
 const handler = async (event) => {
     console.log(`advertise invoked with event ${JSON.stringify(event)}`);
+
+    let params = {
+        TableName: process.env.TOPICS_TABLE
+    };
+
+    let response = await dynamodb.scan(params).promise();
+    console.log(response);
+
+    let items = response['Items'];
+    if(items.length == 0) {
+        return [];
+    }
+
+    return items.map(i => i['Topic']['S']);
 }
 
 

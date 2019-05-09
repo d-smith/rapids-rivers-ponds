@@ -3,6 +3,7 @@ const vorpal = require('vorpal')();
 const writeToRapids = require('../api/api.js').writeToRapids;
 const getMessageBatch = require('../api/api.js').getMessageBatch;
 const listSubscriptions = require('../api/api.js').listSubscriptions;
+const listTopics = require('../api/api.js').listTopics;
 var program = require('commander');
 var chance = require('chance').Chance()
 
@@ -70,7 +71,8 @@ const dispatchListSubs = async (args, callback) => {
 }
 
 const dispatchTopics = async (args, callback) => {
-    console.log('Not implemented');
+    let res = await listTopics(stage);
+    console.log(res);
     callback();
 };
 

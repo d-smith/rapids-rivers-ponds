@@ -48,11 +48,22 @@ const listSubscriptions = async (stage, river) => {
     return parsed;
 }
 
+const listTopics = async(stage) => {
+    let params = {
+        FunctionName: `Advertise-${stage}`,
+        Payload: JSON.stringify({})
+    }
 
+    let result = await lambda.invoke(params).promise();
+    let parsed = JSON.parse(result['Payload']);
+
+    return parsed;
+}
 
 module.exports = {
     writeToRapids,
     getMessageBatch,
-    listSubscriptions
+    listSubscriptions,
+    listTopics
 };
 
