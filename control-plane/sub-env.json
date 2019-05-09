@@ -15,7 +15,7 @@
         "SUBTABLE":"Subscriptions-dev",
         "STAGE":"dev"
     },
-    "Advertise": {
+    "Topics": {
         "TOPICS_TABLE":"Topics-dev",
         "STAGE":"dev"
     }

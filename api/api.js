@@ -50,7 +50,7 @@ const listSubscriptions = async (stage, river) => {
 
 const listTopics = async(stage) => {
     let params = {
-        FunctionName: `Advertise-${stage}`,
+        FunctionName: `Topics-${stage}`,
         Payload: JSON.stringify({})
     }
 

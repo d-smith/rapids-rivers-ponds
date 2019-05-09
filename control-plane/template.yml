@@ -165,13 +165,13 @@ Resources:
                   - dynamodb:Query
                 Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}'
 
-  Advertise:
+  Topics:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Join [ -, [Advertise, !Ref "Stage"]]
+      FunctionName: !Join [ -, [Topics, !Ref "Stage"]]
       Handler: advertise.handler
       CodeUri: src/
-      Role: !GetAtt [ AdvertiseExecutionRole, Arn ]
+      Role: !GetAtt [ TopicsExecutionRole, Arn ]
       Timeout: 20
       Environment:
         Variables:
@@ -179,7 +179,7 @@ Resources:
           TOPICS_TABLE: !Join [-, [Topics, !Ref 'Stage']]
 
 
-  AdvertiseExecutionRole:
+  TopicsExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:

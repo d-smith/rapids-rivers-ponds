@@ -27,5 +27,5 @@ sam local invoke ControlProcessor -e advertise-topic.json -n sub-env.json
 List topics
 
 ```console
-sam local invoke Advertise -e list-topics.json -n sub-env.json
+sam local invoke Topics -e list-topics.json -n sub-env.json
 ```
