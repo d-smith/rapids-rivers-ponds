@@ -24,6 +24,7 @@ Resources:
         Variables:
           STAGE: !Ref Stage
           SUBTABLE: !Join [-, [Subscriptions, !Ref 'Stage']]
+          TOPICS_TABLE: !Join [-, [Topics, !Ref 'Stage']]
           TOPIC_ARN:
             Fn::ImportValue: !Join [-, [TopicArn, !Ref 'Stage']]
           QUEUE_ARN_BASE: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:'
@@ -81,7 +82,7 @@ Resources:
                   - logs:PutLogEvents
                 Resource: '*'
 
-        - PolicyName: WriteToDDB
+        - PolicyName: SubsDDB
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -91,6 +92,15 @@ Resources:
                   - dynamodb:Query
                   - dynamodb:DeleteItem
                 Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}'
+
+        - PolicyName: TopicsDDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Topics-${Stage}'
 
                 
         - PolicyName: StreamAccess
@@ -155,4 +165,51 @@ Resources:
                   - dynamodb:Query
                 Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}'
 
-                   
+  Topics:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ -, [Topics, !Ref "Stage"]]
+      Handler: advertise.handler
+      CodeUri: src/
+      Role: !GetAtt [ TopicsExecutionRole, Arn ]
+      Timeout: 20
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          TOPICS_TABLE: !Join [-, [Topics, !Ref 'Stage']]
+
+
+  TopicsExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+
+        - PolicyName: CreateAndWriteLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+        - PolicyName: ReadFromDDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Topics-${Stage}'
+                 

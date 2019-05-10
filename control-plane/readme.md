@@ -17,3 +17,15 @@ List subscriptions
 ```console
 sam local invoke ListSubs -e list-subs-event.json -n sub-env.json
 ```
+
+Advertise topic
+
+```console
+sam local invoke ControlProcessor -e advertise-topic.json -n sub-env.json
+```
+
+List topics
+
+```console
+sam local invoke Topics -e list-topics.json -n sub-env.json
+```

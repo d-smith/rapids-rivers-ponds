@@ -4,6 +4,7 @@ var dynamodb = new AWS.DynamoDB();
 var sns = new AWS.SNS();
 const processUnsubscribe = require('./unsub').processUnsubscribe;
 const getTopicSubsForRiver = require('./common').getTopicSubsForRiver;
+const processAdvertise = require('./advertise').processAdvertise;
 
 let parseInput = (recordData) => {
     let buff = new Buffer(recordData, 'base64'); 
@@ -19,6 +20,9 @@ let dispatchCommand = async (cmd) => {
             break;
         case 'unsubscribe':
             await processUnsubscribe(cmd);
+            break;
+        case 'advertise':
+            await processAdvertise(cmd);
             break;
         default:
             console.log(`Command not supported: ${JSON.stringify(cmd)}`);

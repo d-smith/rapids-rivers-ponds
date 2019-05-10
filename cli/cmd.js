@@ -3,6 +3,7 @@ const vorpal = require('vorpal')();
 const writeToRapids = require('../api/api.js').writeToRapids;
 const getMessageBatch = require('../api/api.js').getMessageBatch;
 const listSubscriptions = require('../api/api.js').listSubscriptions;
+const listTopics = require('../api/api.js').listTopics;
 var program = require('commander');
 var chance = require('chance').Chance()
 
@@ -69,6 +70,24 @@ const dispatchListSubs = async (args, callback) => {
     callback();
 }
 
+const dispatchTopics = async (args, callback) => {
+    let res = await listTopics(stage);
+    console.log(res);
+    callback();
+};
+
+const dispatchAdvertise = async(args, callback) => {
+    let event = {
+        command: 'advertise',
+        commandArgs: {
+            topic: args.topic
+        }
+    };
+
+    let res = await writeToRapids(controlStream, 'CLI', event);
+    callback();
+};
+
 const setStream = async(args, callback) => {
     console.log(`stream is ${args.stream}`);
     streamName = args.stream;
@@ -102,6 +121,14 @@ vorpal
 vorpal
     .command('unsubscribe <river> <topic>', 'Remove a topic from a river subscription')
     .action(dispatchUnsubscribe);
+
+vorpal
+    .command('topics', 'List topics')
+    .action(dispatchTopics);
+
+vorpal
+    .command('advertise <topic>', 'Advertise a topic others may consume')
+    .action(dispatchAdvertise);
 
 streamName = program.rapids;
 controlStream = program.controlStream;
