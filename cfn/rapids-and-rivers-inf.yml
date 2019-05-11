@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Create the infrastructure needed for rapid and rivers, including the streams used by the control
+  and data planes, the topic used to distribute events  to rivers via filter policies, and the 
+  dynamodb tables used to track subscriptions and topics.
+
+Parameters:
+  Stage:
+    Type: String
+    Description: stage/environment discriminator to allow instantiating multiple stacks in the same account/region
+
+Resources:
+  RapidsStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Join [ -, [Rapids, !Ref "Stage"]]
+      ShardCount: 1
+
+  ControlStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Join [ -, [Control, !Ref "Stage"]]
+      ShardCount: 1
+
+  Subscriptions:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: Subscriber
+          AttributeType: S
+        - AttributeName: Topic
+          AttributeType: S
+      KeySchema:
+        - 
+          AttributeName: Subscriber
+          KeyType: HASH
+        -
+          AttributeName: Topic
+          KeyType: RANGE
+
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+      TableName: !Sub Subscriptions-${Stage}
+      GlobalSecondaryIndexes:
+        
+        - IndexName: SubsForTopic
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+          KeySchema:
+            -
+              AttributeName: Topic
+              KeyType: HASH
+          Projection:
+            NonKeyAttributes:
+              -
+                Subscriber
+            ProjectionType: INCLUDE
+  RapidsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub Rapids-${Stage}
+      TopicName: !Sub Rapids-${Stage}
+
+  Topics:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: Topic
+          AttributeType: S
+      KeySchema:
+        - 
+          AttributeName: Topic
+          KeyType: HASH
+
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+      TableName: !Sub Topics-${Stage}
+
+Outputs:
+  RapidsStreamArn:
+    Value: 
+      !GetAtt RapidsStream.Arn
+    Export:
+      Name: 
+        !Join [-, [RapidsArn, !Ref 'Stage']]
+
+  RapidsStreamName:
+    Value: !Ref RapidsStream
+
+  ControlStreamArn:
+    Value: 
+      !GetAtt ControlStream.Arn
+    Export:
+      Name: 
+        !Join [-, [ControlArn, !Ref 'Stage']]
+
+  ControlStreamName:
+    Value: !Ref ControlStream
+
+  Tablename:
+    Value: !Ref Subscriptions
+    Export:
+      Name:
+        !Join [-, [Subscriptions, !Ref 'Stage']]
+
+  TopicArn:
+    Value: !Ref RapidsTopic
+    Export:
+      Name:
+        !Join [-, [TopicArn, !Ref 'Stage']]
+
+  TopicsTablename:
+    Value: !Ref Topics
+    Export:
+      Name:
+        !Join [-, [Topics, !Ref 'Stage']]

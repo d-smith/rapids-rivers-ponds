@@ -59,34 +59,27 @@ We'll assume a JSON event structure that includes some standard fields:
 
 ## Deploying Rapids and Rivers
 
-To deploy the rapids:
+To deploy the rapids and rivers infrastructure:
 
 ```console
-aws cloudformation create-stack --stack-name rapids-and-control \
---template-body file://cfn/rapids-and-control.yml \
+aws cloudformation create-stack --stack-name rapids-and-rivers-inf \
+--template-body file://cfn/rapids-and-rivers-inf.yml \
 --parameters ParameterKey=Stage,ParameterValue=dev
 ```
-
-To deploy the subs and topic tables:
-
+To deploy the control plane:
 
 ```console
-aws cloudformation create-stack --stack-name subs \
---template-body file://cfn/subs.yml \
---parameters ParameterKey=Stage,ParameterValue=dev
-
-aws cloudformation create-stack --stack-name topics \
---template-body file://cfn/topics.yml \
---parameters ParameterKey=Stage,ParameterValue=dev
+cd control-plane
+make
 ```
 
-To deploy the rapids topic:
+To deploy the data plane:
 
 ```console
-aws cloudformation create-stack --stack-name topic \
---template-body file://cfn/topic.yml \
---parameters ParameterKey=Stage,ParameterValue=dev
+cd data-plane
+make
 ```
+
 ## CLI
 
 Use the cli to send events and commands.
