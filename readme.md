@@ -26,21 +26,36 @@ cmd > help
     send <event> <source> [data]  Publish event with optional data
     subscribe <river> <topic>     Subscribe a river to a topic
     readfrom <river>              Get a batch of messages
+    listsubs <river>              List subscriptions for a river
+    unsubscribe <river> <topic>   Remove a topic from a river subscription
+    topics                        List topics
+    advertise <topic>             Advertise a topic others may consume
 
-cmd > subscribe MyApp ViewPage
-cmd > subscribe AnotherApp AnotherEvent
-cmd > readfrom MyApp
+cmd > topics
+[]
+cmd > advertise ViewPage
+cmd > topics
+[ 'ViewPage' ]
+cmd > subscribe r1 ViewPage
+cmd > readfrom r1
 []
 cmd > send ViewPage TheSource '{"name":"Sally"}'
-cmd > readfrom MyApp
-[ { eventType: 'ViewPage',
-    eventDomain: 'TheSource',
-    payload: { name: 'Sally' },
-    timestamp: '2019-04-18T22:17:36.352Z',
-    eventId: '1f183791-82df-487f-84aa-224c024f79ba' } ]
-cmd > readfrom AnotherApp
+cmd > readfrom r1
+[ { Type: 'Notification',
+    MessageId: 'ff1848ec-05af-5830-8545-1dbd5c35af3a',
+    TopicArn: 'arn:aws:sns:us-east-1:nnnn:Rapids-dev',
+    Message: '{"eventType":"ViewPage","eventDomain":"TheSource","payload":{"name":"Sally"},"timestamp":"2019-05-11T23:14:31.550Z","eventId":"7dcfc14f-a197-4769-b8e0-aff2c76b8bd7"}',
+    Timestamp: '2019-05-11T23:14:34.874Z',
+    SignatureVersion: '1',
+    Signature: 'M7AwFkffkQWBL959j3E/Os/+RjiAj3/xQCh95GJDIvX6IQBdhb1rj2IinzpaKpl/aouOMMUM7oMJe3J7xLdXzIKHhB+hIvj1rfunewCzbBo3fxJZ3ckPEUy/Wlxl42Th/5S1hMHdr6uE9nuDGN6fLMahfcEFcKUVKfAAChengnjWolCvZD3sskc7XxDkRlofru6I1sEWzDRt/v+IBsDAdn46mRCRTNjXfiim3KvpEeExH6Pov1SaJegTgJLv6q8OhRNeWyAHVMudWUtnHHYA5uCu24lOj/iw6xeqnXYAegq6oTaAjIcyxQSNheIB8xXMEQsCoHDBxYFGy0BiC3X4aw==',
+    SigningCertURL: 'https://sns.us-east-1.amazonaws.com/SimpleNotificationService-6aad65c2f9911b05cd53efda11f913f9.pem',
+    UnsubscribeURL: 'https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:nnnn:Rapids-dev:02e9f8e3-0d20-4023-bd33-e87f3f93a776',
+    MessageAttributes: { event_type: [Object] } } ]
+cmd > listsubs r1
+[ 'ViewPage' ]
+cmd > unsubscribe r1 ViewPage
+cmd > listsubs r1
 []
-cmd > 
 ```
 
 ## Event structure
@@ -59,34 +74,27 @@ We'll assume a JSON event structure that includes some standard fields:
 
 ## Deploying Rapids and Rivers
 
-To deploy the rapids:
+To deploy the rapids and rivers infrastructure:
 
 ```console
-aws cloudformation create-stack --stack-name rapids-and-control \
---template-body file://cfn/rapids-and-control.yml \
+aws cloudformation create-stack --stack-name rapids-and-rivers-inf \
+--template-body file://cfn/rapids-and-rivers-inf.yml \
 --parameters ParameterKey=Stage,ParameterValue=dev
 ```
-
-To deploy the subs and topic tables:
-
+To deploy the control plane:
 
 ```console
-aws cloudformation create-stack --stack-name subs \
---template-body file://cfn/subs.yml \
---parameters ParameterKey=Stage,ParameterValue=dev
-
-aws cloudformation create-stack --stack-name topics \
---template-body file://cfn/topics.yml \
---parameters ParameterKey=Stage,ParameterValue=dev
+cd control-plane
+make
 ```
 
-To deploy the rapids topic:
+To deploy the data plane:
 
 ```console
-aws cloudformation create-stack --stack-name topic \
---template-body file://cfn/topic.yml \
---parameters ParameterKey=Stage,ParameterValue=dev
+cd data-plane
+make
 ```
+
 ## CLI
 
 Use the cli to send events and commands.
