@@ -79,7 +79,8 @@ To deploy the rapids and rivers infrastructure:
 ```console
 aws cloudformation create-stack --stack-name rapids-and-rivers-inf \
 --template-body file://cfn/rapids-and-rivers-inf.yml \
---parameters ParameterKey=Stage,ParameterValue=dev
+--parameters ParameterKey=Stage,ParameterValue=dev \
+ParameterKey=KMSKeyAlias,ParameterValue=alias/MyKey
 ```
 To deploy the control plane:
 

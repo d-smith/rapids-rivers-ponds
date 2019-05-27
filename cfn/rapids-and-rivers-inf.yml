@@ -8,6 +8,9 @@ Parameters:
   Stage:
     Type: String
     Description: stage/environment discriminator to allow instantiating multiple stacks in the same account/region
+  KMSKeyAlias:
+    Type: String
+    Description: Key alias used to protect data at rest for kinesis
 
 Resources:
   RapidsStream:
@@ -15,12 +18,18 @@ Resources:
     Properties:
       Name: !Join [ -, [Rapids, !Ref "Stage"]]
       ShardCount: 1
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: !Ref KMSKeyAlias
 
   ControlStream:
     Type: AWS::Kinesis::Stream
     Properties:
       Name: !Join [ -, [Control, !Ref "Stage"]]
       ShardCount: 1
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: !Ref KMSKeyAlias
 
   Subscriptions:
     Type: AWS::DynamoDB::Table
@@ -64,6 +73,7 @@ Resources:
     Properties:
       DisplayName: !Sub Rapids-${Stage}
       TopicName: !Sub Rapids-${Stage}
+      KmsMasterKeyId: !Ref KMSKeyAlias
 
   Topics:
     Type: AWS::DynamoDB::Table
