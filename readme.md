@@ -89,7 +89,7 @@ cd control-plane
 make
 ```
 
-After the stack is created, add the role created by the stack (e.g. control-plane-ControlProcExecutionRole-12HRI62O6O2AL) as a key user in the key policy associated with the key alias.
+After the stack is created, add the control-plane-ControlProcExecutionRole role created by the stack (e.g. control-plane-ControlProcExecutionRole-12HRI62O6O2AL) as a key user in the key policy associated with the key alias.
 
 To deploy the data plane:
 
@@ -97,6 +97,26 @@ To deploy the data plane:
 cd data-plane
 make
 ```
+
+After the stack is created, add the data-plane-StreamProcExecutionRole and data-plane-BatchForRiverExecutionRole roles (e.g. data-plane-BatchForRiverExecutionRole-15YN3FWW1AJCE and data-plane-StreamProcExecutionRole-1RYF2VTIUJE6H) as key users in the key policy associated with the key alias.
+
+Also, you must add sns as a user of the key to allow it to write to encrypted queues. Add this to the key policy:
+
+```console
+{
+    "Sid": "Allow Amazon SNS to use this key",
+    "Effect": "Allow",
+    "Principal": {
+        "Service": "sns.amazonaws.com"
+    },
+    "Action": [
+        "kms:Decrypt",
+        "kms:GenerateDataKey*"
+    ],
+    "Resource": "*"
+}
+```
+
 
 ## CLI
 
