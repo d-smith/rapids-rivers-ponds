@@ -10,6 +10,9 @@ Parameters:
   Stage: 
     Type: String
     Default: dev
+  KMSKeyAlias:
+    Type: String
+    Description: Key to use for protecting queues created for rivers
 
 Resources:
   ControlProcessor:
@@ -29,6 +32,7 @@ Resources:
             Fn::ImportValue: !Join [-, [TopicArn, !Ref 'Stage']]
           QUEUE_ARN_BASE: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:'
           QUEUE_URL_BASE: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/'
+          KEY_ALIAS: !Ref KMSKeyAlias
       Events:
         StreamEvent:
           Type: Kinesis
@@ -101,7 +105,6 @@ Resources:
                 Action:
                   - dynamodb:PutItem
                 Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Topics-${Stage}'
-
                 
         - PolicyName: StreamAccess
           PolicyDocument:

@@ -89,6 +89,8 @@ cd control-plane
 make
 ```
 
+After the stack is created, add the role created by the stack (e.g. control-plane-ControlProcExecutionRole-12HRI62O6O2AL) as a key user in the key policy associated with the key alias.
+
 To deploy the data plane:
 
 ```console
