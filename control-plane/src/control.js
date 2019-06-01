@@ -59,7 +59,10 @@ const createRiver = async (river) => {
     console.log(`create queue ${riverQName} for river ${river}`);
 
     let response = await sqs.createQueue({
-        QueueName: riverQName
+        QueueName: riverQName,
+        Attributes: {
+            'KmsMasterKeyId' : process.env.KEY_ALIAS
+        }
     }).promise();
     console.log(response);
 }
