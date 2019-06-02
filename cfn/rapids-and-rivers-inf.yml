@@ -11,13 +11,19 @@ Parameters:
   KMSKeyAlias:
     Type: String
     Description: Key alias used to protect data at rest for kinesis
+  ControlStreamShards:
+    Type: Number
+    Default: 1
+  RapidsStreamShards:
+    Type: Number
+    Default: 1
 
 Resources:
   RapidsStream:
     Type: AWS::Kinesis::Stream
     Properties:
       Name: !Join [ -, [Rapids, !Ref "Stage"]]
-      ShardCount: 1
+      ShardCount: !Ref RapidsStreamShards
       StreamEncryption:
         EncryptionType: KMS
         KeyId: !Ref KMSKeyAlias
@@ -26,7 +32,7 @@ Resources:
     Type: AWS::Kinesis::Stream
     Properties:
       Name: !Join [ -, [Control, !Ref "Stage"]]
-      ShardCount: 1
+      ShardCount: !Ref ControlStreamShards
       StreamEncryption:
         EncryptionType: KMS
         KeyId: !Ref KMSKeyAlias
