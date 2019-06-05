@@ -1,9 +1,7 @@
 const AWS = require('aws-sdk');
 var sqs = new AWS.SQS();
 var dynamodb = new AWS.DynamoDB();
-var sns = new AWS.SNS();
 const processUnsubscribe = require('./unsub').processUnsubscribe;
-const getTopicSubsForRiver = require('./common').getTopicSubsForRiver;
 const processAdvertise = require('./advertise').processAdvertise;
 
 let parseInput = (recordData) => {
@@ -88,104 +86,6 @@ const recordSubscription = async (river, topic, subscriptionArn) => {
     console.log(response);
 }
 
-
-
-const enableTopicSendToQueue = async (river, topic) => {
-
-    let statements = [];
-    console.log(`add statement for topic ${topic}`);
-    let statement = {
-        Effect: "Allow",
-        Principal: {
-            AWS: "*"
-        },
-        Action: "SQS:SendMessage",
-        Resource: `${process.env.QUEUE_ARN_BASE}${formRiverQName(river)}`,
-        Condition: {
-            ArnEquals: {
-                "aws:SourceArn":process.env.TOPIC_ARN
-            }
-        }
-    }
-
-    statements.push(statement)
-
-    let queuePolicy = {
-        Version: '2012-10-17',
-        Id: `${process.env.QUEUE_ARN_BASE}${formRiverQName(river)}/MySQSPolicy`,
-        Statement: statements
-    }
-
-    let params = {
-        Attributes: {
-            Policy: JSON.stringify(queuePolicy)
-        },
-        QueueUrl: `${process.env.QUEUE_URL_BASE}${formRiverQName(river)}`
-    };
-
-    console.log(JSON.stringify(params));
-
-    let response = await sqs.setQueueAttributes(params).promise();
-    console.log(response);
-}
-
-const subscribeRiverToTopic = async (river, topic) => {
-    
-
-    //new sub
-    let topicSubResults =  await getTopicSubsForRiver(river);
-    let topics = topicSubResults.topics;
-    let numberOfPreviousTopics = topics.length;
-    console.log(topicSubResults);
-    
-
-    //Add the new event type topic to the list to subscribe to
-    topics.push(topic);
-
-    //Allow topic to send to queue
-    if(numberOfPreviousTopics == 0) {
-        await enableTopicSendToQueue(river, topic);
-    }; 
-
-    //Bake them into a FilterPolicy
-    let filterPolicy = {
-        event_type: topics
-    };
-
-    console.log(filterPolicy);
-
-    if(numberOfPreviousTopics > 0) {
-        console.log('update subscription policy');
-        //Update filter policy
-        let params = {
-            AttributeName: 'FilterPolicy',
-            SubscriptionArn: topicSubResults.subscriptionArn,
-            AttributeValue: JSON.stringify(filterPolicy)
-        };
-
-        let result = await sns.setSubscriptionAttributes(params).promise();
-        console.log(result);
-        return topicSubResults.subscriptionArn;
-
-    } 
-
-    //Subscribe the queue to the topic with the update filter policy
-    console.log('subscribe queue to topic');
-    let params = {
-        TopicArn: process.env.TOPIC_ARN,
-        Protocol: 'sqs',
-        Endpoint: `${process.env.QUEUE_ARN_BASE}${formRiverQName(river)}`,
-        Attributes: {
-            FilterPolicy: JSON.stringify(filterPolicy)
-        },
-        ReturnSubscriptionArn: true
-    }
-
-    let response = await sns.subscribe(params).promise();
-    console.log(response);
-    return response['SubscriptionArn'];
-};
-
 let processSubscribe = async (cmd) => {
     console.log(JSON.stringify(cmd));
     let river = cmd.commandArgs.river;
@@ -201,13 +101,9 @@ let processSubscribe = async (cmd) => {
         console.log('river exists... subscribe');
     }
 
-    //console.log('subscribe river to topic');
-    //let subscriptionArn = await subscribeRiverToTopic(river, topic);
 
     console.log('record subscription');
-    //if(subscriptionArn != 'previouslyRecorded') {
-        await recordSubscription(river, topic, 'xxx');
-    //}
+    await recordSubscription(river, topic, 'xxx');
 } 
 
 
