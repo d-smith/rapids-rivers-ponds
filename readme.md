@@ -82,7 +82,7 @@ aws cloudformation create-stack --stack-name rapids-and-rivers-inf \
 --parameters ParameterKey=Stage,ParameterValue=dev \
 ParameterKey=KMSKeyAlias,ParameterValue=alias/MyKey
 ```
-To deploy the control plane:
+To deploy the control plane (from one of the implementation directories):
 
 ```console
 cd control-plane

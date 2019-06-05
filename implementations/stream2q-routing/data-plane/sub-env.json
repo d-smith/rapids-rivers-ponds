@@ -1,0 +1,11 @@
+{
+    "ControlProcessor": {
+        "SUBTABLE":"Subscriptions-dev",
+        "STAGE":"dev"
+    },
+    "StreamProcessor": {
+        "STAGE":"dev",
+        "SUBTABLE":"Subscriptions-dev",
+        "TOPIC_ARN":"my_topic_arn"
+    }
+}

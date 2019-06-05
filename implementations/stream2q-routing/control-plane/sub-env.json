@@ -1,0 +1,22 @@
+{
+    "ControlProcessor": {
+        "SUBTABLE":"Subscriptions-dev",
+        "STAGE":"dev",
+        "TOPIC_ARN":"your_value_here",
+        "QUEUE_ARN_BASE":"your_value_here",
+        "QUEUE_URL_BASE":"your_value_here",
+        "TOPICS_TABLE":"Topics-dev"
+    },
+    "StreamProcessor": {
+        "SUBTABLE":"Subscriptions-dev",
+        "STAGE":"dev"
+    },
+    "ListSubs": {
+        "SUBTABLE":"Subscriptions-dev",
+        "STAGE":"dev"
+    },
+    "Topics": {
+        "TOPICS_TABLE":"Topics-dev",
+        "STAGE":"dev"
+    }
+}

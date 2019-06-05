@@ -1,0 +1,219 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  Rapid rivers control plane
+Globals:
+  Function:
+    Runtime: "nodejs8.10"
+
+Parameters:
+  Stage: 
+    Type: String
+    Default: dev
+  KMSKeyAlias:
+    Type: String
+    Description: Key to use for protecting queues created for rivers
+
+Resources:
+  ControlProcessor:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ -, [ControlProcessor, !Ref "Stage"]]
+      Handler: control.handler
+      CodeUri: src/
+      Role: !GetAtt [ ControlProcExecutionRole, Arn ]
+      Timeout: 20
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          SUBTABLE: !Join [-, [Subscriptions, !Ref 'Stage']]
+          TOPICS_TABLE: !Join [-, [Topics, !Ref 'Stage']]
+          TOPIC_ARN:
+            Fn::ImportValue: !Join [-, [TopicArn, !Ref 'Stage']]
+          QUEUE_ARN_BASE: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:'
+          QUEUE_URL_BASE: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/'
+          KEY_ALIAS: !Ref KMSKeyAlias
+      Events:
+        StreamEvent:
+          Type: Kinesis
+          Properties:
+            Stream: !Sub 'arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/Control-${Stage}'
+            StartingPosition: LATEST
+            BatchSize: 10
+
+  ControlProcExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join [-, [RRControlProcRole, !Ref 'Stage']]
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: AccessSQS
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:CreateQueue
+                  - sqs:GetQueueUrl
+                  - sqs:SetQueueAttributes
+                Resource: '*'
+
+        - PolicyName: AccessSNS
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Subscribe
+                  - sns:Unsubscribe
+                  - sns:SetSubscriptionAttributes
+                Resource: '*'
+
+        - PolicyName: CreateAndWriteLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+        - PolicyName: SubsDDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:DeleteItem
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}'
+
+        - PolicyName: TopicsDDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Topics-${Stage}'
+                
+        - PolicyName: StreamAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kinesis:GetRecords
+                  - kinesis:GetShardIterator
+                  - kinesis:DescribeStream
+                  - kinesis:ListStreams
+                Resource: 
+                  Fn::ImportValue: 
+                    !Join ['-', [ControlArn, !Ref 'Stage']]
+
+
+  ListSubs:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ -, [ListSubs, !Ref "Stage"]]
+      Handler: listsubs.handler
+      CodeUri: src/
+      Role: !GetAtt [ ListSubsExecutionRole, Arn ]
+      Timeout: 20
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          SUBTABLE: !Join [-, [Subscriptions, !Ref 'Stage']]
+          
+
+  ListSubsExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+
+        - PolicyName: CreateAndWriteLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+        - PolicyName: ReadFromDDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:Query
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Subscriptions-${Stage}'
+
+  Topics:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ -, [Topics, !Ref "Stage"]]
+      Handler: advertise.handler
+      CodeUri: src/
+      Role: !GetAtt [ TopicsExecutionRole, Arn ]
+      Timeout: 20
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          TOPICS_TABLE: !Join [-, [Topics, !Ref 'Stage']]
+
+
+  TopicsExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+
+        - PolicyName: CreateAndWriteLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+        - PolicyName: ReadFromDDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Topics-${Stage}'
+                 
