@@ -22,12 +22,8 @@ const getTopicSubsForRiver = async (river) => {
     let items = response["Items"];
 
     let topics = items.map(i => {return i["Topic"]["S"]});
-    let subArn = '';
-    if(items.length > 0) {
-        subArn = items[0]["SubscriptionArn"]["S"];
-    }
 
-    return {subscriptionArn: subArn, topics: topics};
+    return {topics: topics};
 }
 
 module.exports = {

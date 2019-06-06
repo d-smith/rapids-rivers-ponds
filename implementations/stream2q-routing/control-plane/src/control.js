@@ -65,7 +65,7 @@ const createRiver = async (river) => {
     console.log(response);
 }
 
-const recordSubscription = async (river, topic, subscriptionArn) => {
+const recordSubscription = async (river, topic) => {
     console.log(`add sub to table ${process.env.SUBTABLE}`);
     let params = {
         Item: {
@@ -74,9 +74,6 @@ const recordSubscription = async (river, topic, subscriptionArn) => {
             },
             "Topic": {
                 S: topic
-            },
-            "SubscriptionArn": {
-                S: subscriptionArn
             }
         },
         TableName: process.env.SUBTABLE
@@ -103,7 +100,7 @@ let processSubscribe = async (cmd) => {
 
 
     console.log('record subscription');
-    await recordSubscription(river, topic, 'xxx');
+    await recordSubscription(river, topic);
 } 
 
 

@@ -28,8 +28,6 @@ Resources:
           STAGE: !Ref Stage
           SUBTABLE: !Join [-, [Subscriptions, !Ref 'Stage']]
           TOPICS_TABLE: !Join [-, [Topics, !Ref 'Stage']]
-          TOPIC_ARN:
-            Fn::ImportValue: !Join [-, [TopicArn, !Ref 'Stage']]
           QUEUE_ARN_BASE: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:'
           QUEUE_URL_BASE: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/'
           KEY_ALIAS: !Ref KMSKeyAlias
@@ -65,16 +63,6 @@ Resources:
                   - sqs:SetQueueAttributes
                 Resource: '*'
 
-        - PolicyName: AccessSNS
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - sns:Subscribe
-                  - sns:Unsubscribe
-                  - sns:SetSubscriptionAttributes
-                Resource: '*'
 
         - PolicyName: CreateAndWriteLogs
           PolicyDocument:
