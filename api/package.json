@@ -12,6 +12,6 @@
     "aws-sdk": "^2.418.0"
   },
   "dependencies": {
-    "proxy-agent": "^3.0.3"
+    "proxy-agent": "^5.0.0"
   }
 }
